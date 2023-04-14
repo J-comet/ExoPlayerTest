@@ -1,10 +1,12 @@
 package hs.project.exoplayertest
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import hs.project.exoplayertest.databinding.ActivityMainBinding
+import hs.project.exoplayertest.recyclerview.RecyclerActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,6 +21,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        binding.btnRecyclerview.setOnClickListener {
+            startActivity(Intent(this, RecyclerActivity::class.java))
+        }
     }
 
     override fun onStart() {
