@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
@@ -29,8 +30,13 @@ class RecyclerActivity : AppCompatActivity() {
 
     private fun init() {
         recycleAdapter.setOnListener(object : RecyclerAdapter.OnRecyclerListener {
-            override fun onPlay(item: RecyclerItem) {
-                play(item.path)
+            override fun onPlay(item: RecyclerItem, exoPlayer: ExoPlayer?) {
+                exoPlayer?.let {
+                    it.playWhenReady = true
+                    it.seekTo(item.currentWindow, item.playbackPosition)
+                    it.prepare()
+                }
+
                 Toast.makeText(this@RecyclerActivity, item.videoNo, Toast.LENGTH_SHORT).show()
             }
         })
@@ -38,25 +44,21 @@ class RecyclerActivity : AppCompatActivity() {
         with(binding.rvList) {
             adapter = recycleAdapter
             layoutManager = LinearLayoutManager(context)
+            itemAnimator = null
         }
     }
 
     private fun setData() {
         for (i in 0..10) {
             recycleList.add(
-                RecyclerItem(i, getString(R.string.media_url_mp4))
+                RecyclerItem(
+                    i,
+                    getString(R.string.media_url_mp4),
+                    false,
+                    0,
+                    0L
+                )
             )
         }
-    }
-
-    private fun play(url: String) {
-        val dataSourceFactory = DefaultDataSourceFactory(this)
-        val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
-        /*player?.apply {
-            setMediaSource(mediaSource)
-            prepare()
-            play()
-        }*/
     }
 }

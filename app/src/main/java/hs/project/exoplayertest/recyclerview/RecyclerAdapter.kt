@@ -30,7 +30,7 @@ class RecyclerAdapter : androidx.recyclerview.widget.ListAdapter<RecyclerItem, R
     private var eventListener: OnRecyclerListener?= null
 
     interface OnRecyclerListener {
-        fun onPlay(item: RecyclerItem)
+        fun onPlay(item: RecyclerItem, exoPlayer: ExoPlayer?)
     }
 
     fun setOnListener(listener: OnRecyclerListener) {
@@ -54,13 +54,13 @@ class RecyclerAdapter : androidx.recyclerview.widget.ListAdapter<RecyclerItem, R
 
         private var player: ExoPlayer? = null
 
-        private var playWhenReady = true
-        private var currentWindow = 0
-        private var playbackPosition = 0L
+//        private var playWhenReady = true
+//        private var currentWindow = 0
+//        private var playbackPosition = 0L
 
         init {
             itemBinding.root.setOnClickListener {
-                listener?.onPlay(currentList[bindingAdapterPosition])
+                listener?.onPlay(currentList[bindingAdapterPosition], player)
             }
         }
 
@@ -68,27 +68,23 @@ class RecyclerAdapter : androidx.recyclerview.widget.ListAdapter<RecyclerItem, R
             initializePlayer(data.path)
         }
 
-        private fun releasePlayer() {
-            player?.run {
-                playbackPosition = this.currentPosition
-                currentWindow = this.currentMediaItemIndex
-                playWhenReady = this.playWhenReady
-                release()
-            }
-            player = null
-        }
+//        private fun releasePlayer() {
+//            player?.run {
+//                playbackPosition = this.currentPosition
+//                currentWindow = this.currentMediaItemIndex
+//                playWhenReady = this.playWhenReady
+//                release()
+//            }
+//            player = null
+//        }
 
         private fun initializePlayer(path: String) {
-            player = ExoPlayer.Builder(itemBinding.root.context)
-                .build()
-                .also { exoPlayer ->
-                    itemBinding.videoView.player = exoPlayer
-                    val mediaItem = MediaItem.fromUri(path)
-                    exoPlayer.setMediaItem(mediaItem)
-                    exoPlayer.playWhenReady = playWhenReady
-                    exoPlayer.seekTo(currentWindow, playbackPosition)
-                    exoPlayer.prepare()
-                }
+            player = ExoPlayer.Builder(itemBinding.root.context).build().also {
+                val mediaItem = MediaItem.fromUri(path)
+                it.setMediaItem(mediaItem)
+            }
+            itemBinding.videoView.player = player
+
         }
     }
 
