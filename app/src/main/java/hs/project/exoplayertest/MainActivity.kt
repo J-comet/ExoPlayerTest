@@ -14,7 +14,7 @@ class MainActivity : AppCompatActivity() {
 
     private var player: ExoPlayer? = null
 
-    private var playWhenReady = true
+    private var playWhenReady = false
     private var currentWindow = 0
     private var playbackPosition = 0L
 

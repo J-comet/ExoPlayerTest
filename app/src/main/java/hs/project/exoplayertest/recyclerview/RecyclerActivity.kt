@@ -1,14 +1,10 @@
 package hs.project.exoplayertest.recyclerview
 
-import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.source.ProgressiveMediaSource
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import hs.project.exoplayertest.R
 import hs.project.exoplayertest.databinding.ActivityRecyclerBinding
 
@@ -49,14 +45,19 @@ class RecyclerActivity : AppCompatActivity() {
     }
 
     private fun setData() {
+        val videoList = arrayListOf<String>()
+        for (i in 0..3) {
+            videoList.add(getString(R.string.media_url_mp4))
+        }
+
         for (i in 0..10) {
             recycleList.add(
                 RecyclerItem(
                     i,
-                    getString(R.string.media_url_mp4),
                     false,
                     0,
-                    0L
+                    0L,
+                    videoList
                 )
             )
         }
