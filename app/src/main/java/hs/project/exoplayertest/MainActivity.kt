@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
+import hs.project.exoplayertest.custom_recycler.CustomRecyclerActivity
 import hs.project.exoplayertest.databinding.ActivityMainBinding
 import hs.project.exoplayertest.recyclerview.RecyclerActivity
 
@@ -24,6 +25,9 @@ class MainActivity : AppCompatActivity() {
 
         binding.btnRecyclerview.setOnClickListener {
             startActivity(Intent(this, RecyclerActivity::class.java))
+        }
+        binding.btnCustomRecyclerview.setOnClickListener {
+            startActivity(Intent(this, CustomRecyclerActivity::class.java))
         }
     }
 
