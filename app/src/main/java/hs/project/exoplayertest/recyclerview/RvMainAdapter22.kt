@@ -10,14 +10,14 @@ import com.google.android.exoplayer2.PlaybackException
 import com.google.android.exoplayer2.Player
 import hs.project.exoplayertest.databinding.ItemRvMainBinding
 
-class RvMainAdapter(private val callback: Callback) :
-    RecyclerView.Adapter<RvMainAdapter.ViewHolder>() {
+class RvMainAdapter22(private val callback: RvMainAdapter22.Callback) :
+    RecyclerView.Adapter<RvMainAdapter22.ViewHolder>() {
     var datas = ArrayList<RvModel>()
-    var viewHolders = ArrayList<RvMainAdapter.ViewHolder>()
+    var viewHolders = ArrayList<RvMainAdapter22.ViewHolder>()
     var exoPlayer: ExoPlayer? = null
 
     interface Callback {
-        fun callback(selected: RvModel)
+        fun callback(selected: RvModel, position: Int)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -28,6 +28,7 @@ class RvMainAdapter(private val callback: Callback) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(datas[position], position)
         viewHolders.add(holder)
+//        viewHolders.add(holder)
     }
 
     override fun getItemCount(): Int {
@@ -41,15 +42,10 @@ class RvMainAdapter(private val callback: Callback) :
 
             Log.e("item", "item / $item")
 
-//            if (exoPlayer != null) {
-//                Log.e("item", "해제!!!")
-//                exoPlayer = null
-//            }
-
             exoPlayer = ExoPlayer.Builder(itemBinding.root.context).build().also {
                 val mediaItem = MediaItem.fromUri(item.videoPath)
                 it.setMediaItem(mediaItem)
-                it.playWhenReady = item.playWhenReady
+//                it.playWhenReady = item.playWhenReady
                 it.seekTo(item.playbackPosition)
                 it.prepare()
                 it.addListener(object : Player.Listener {
@@ -79,9 +75,9 @@ class RvMainAdapter(private val callback: Callback) :
                         /**
                          * 현재 무한 루프 도는 중
                          */
-//                        if (isPlaying) {
-//                            callback.callback(datas[position])
-//                        }
+                        if (isPlaying) {
+                            callback.callback(datas[position], position)
+                        }
 
 //                        if (isPlaying) {
 //                            binding.videoView2.player?.playWhenReady = false
@@ -101,10 +97,6 @@ class RvMainAdapter(private val callback: Callback) :
             }
 
             itemBinding.playerView.player = exoPlayer
-
-            itemBinding.ivPlay.setOnClickListener {
-                callback.callback(datas[position])
-            }
 
         }
     }
