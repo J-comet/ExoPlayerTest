@@ -29,7 +29,7 @@
             android:name=".custom_recycler.CustomRecyclerActivity"
             android:exported="false" />
         <activity
-            android:name=".recyclerview.RecyclerActivity"
+            android:name=".recyclerview_viewpager.RecyclerActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

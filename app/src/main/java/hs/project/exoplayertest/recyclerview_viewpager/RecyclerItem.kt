@@ -1,4 +1,4 @@
-package hs.project.exoplayertest.recyclerview
+package hs.project.exoplayertest.recyclerview_viewpager
 
 data class RecyclerItem(
     val videoNo: Int,

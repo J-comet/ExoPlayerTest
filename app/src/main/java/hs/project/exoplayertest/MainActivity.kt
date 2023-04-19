@@ -3,14 +3,13 @@ package hs.project.exoplayertest
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import hs.project.exoplayertest.custom_recycler.CustomRecyclerActivity
 import hs.project.exoplayertest.databinding.ActivityMainBinding
-import hs.project.exoplayertest.recyclerview.RecyclerActivity
+import hs.project.exoplayertest.recyclerview_viewpager.RecyclerActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -87,6 +86,7 @@ class MainActivity : AppCompatActivity() {
                 }
             })
         }
+
         binding.videoView2.player = ExoPlayer.Builder(this).build().also {
             val mediaItem = MediaItem.fromUri(test2)
             it.setMediaItem(mediaItem)
@@ -128,6 +128,7 @@ class MainActivity : AppCompatActivity() {
                 }
             })
         }
+
         binding.videoView3.player = ExoPlayer.Builder(this).build().also {
             val mediaItem = MediaItem.fromUri(test3)
             it.setMediaItem(mediaItem)
@@ -165,7 +166,7 @@ class MainActivity : AppCompatActivity() {
                         playWhenReady3 = it.playWhenReady
                         playbackPosition3 = it.currentPosition
                     }
-                    Log.e("3", "333 ".plus("playWhenReady3/").plus(playWhenReady3).plus(" playbackPosition3/").plus(playbackPosition3))
+                    Log.e("3", "333".plus("playWhenReady3/").plus(playWhenReady3).plus(" playbackPosition3/").plus(playbackPosition3))
                 }
             })
         }

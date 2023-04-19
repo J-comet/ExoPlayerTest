@@ -1,4 +1,4 @@
-package hs.project.exoplayertest.recyclerview
+package hs.project.exoplayertest.recyclerview_viewpager
 
 import android.os.Bundle
 import android.widget.Toast

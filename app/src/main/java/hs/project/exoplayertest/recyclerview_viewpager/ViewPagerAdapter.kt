@@ -1,27 +1,25 @@
-package hs.project.exoplayertest.recyclerview
+package hs.project.exoplayertest.recyclerview_viewpager
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager2.widget.ViewPager2
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
-import hs.project.exoplayertest.R
-import hs.project.exoplayertest.databinding.ItemRecyclerBinding
+import hs.project.exoplayertest.databinding.ItemPlayerBinding
 
-class RecyclerAdapter : androidx.recyclerview.widget.ListAdapter<RecyclerItem, RecyclerAdapter.ViewHolder>(
-    object : DiffUtil.ItemCallback<RecyclerItem?>() {
+class ViewPagerAdapter : androidx.recyclerview.widget.ListAdapter<String, ViewPagerAdapter.ViewHolder>(
+    object : DiffUtil.ItemCallback<String?>() {
         override fun areItemsTheSame(
-            oldItem: RecyclerItem,
-            newItem: RecyclerItem
+            oldItem: String,
+            newItem: String
         ): Boolean {
-            return oldItem.videoNo == newItem.videoNo
+            return oldItem == newItem
         }
 
         override fun areContentsTheSame(
-            oldItem: RecyclerItem,
-            newItem: RecyclerItem
+            oldItem: String,
+            newItem: String
         ): Boolean {
             return oldItem == newItem
         }
@@ -31,7 +29,7 @@ class RecyclerAdapter : androidx.recyclerview.widget.ListAdapter<RecyclerItem, R
     private var eventListener: OnRecyclerListener?= null
 
     interface OnRecyclerListener {
-        fun onPlay(item: RecyclerItem, exoPlayer: ExoPlayer?)
+        fun onPlay(item: String, exoPlayer: ExoPlayer?)
     }
 
     fun setOnListener(listener: OnRecyclerListener) {
@@ -39,7 +37,7 @@ class RecyclerAdapter : androidx.recyclerview.widget.ListAdapter<RecyclerItem, R
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = ItemRecyclerBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = ItemPlayerBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding, eventListener)
     }
 
@@ -51,7 +49,7 @@ class RecyclerAdapter : androidx.recyclerview.widget.ListAdapter<RecyclerItem, R
         return position
     }
 
-    inner class ViewHolder(private val itemBinding: ItemRecyclerBinding, listener: OnRecyclerListener?) : RecyclerView.ViewHolder(itemBinding.root) {
+    inner class ViewHolder(private val itemBinding: ItemPlayerBinding, listener: OnRecyclerListener?) : RecyclerView.ViewHolder(itemBinding.root) {
 
         private var player: ExoPlayer? = null
 
@@ -65,18 +63,8 @@ class RecyclerAdapter : androidx.recyclerview.widget.ListAdapter<RecyclerItem, R
             }
         }
 
-        fun bind(data: RecyclerItem) {
-
-            val viewPagerAdapter = ViewPagerAdapter()
-
-            with(itemBinding.vpVideo) {
-                adapter = viewPagerAdapter
-                orientation = ViewPager2.ORIENTATION_HORIZONTAL
-                currentItem = 0
-            }
-            viewPagerAdapter.submitList(data.videoPaths.toList())
-
-//            initializePlayer(data.path)
+        fun bind(data: String) {
+            initializePlayer(data)
         }
 
 //        private fun releasePlayer() {
@@ -89,14 +77,14 @@ class RecyclerAdapter : androidx.recyclerview.widget.ListAdapter<RecyclerItem, R
 //            player = null
 //        }
 
-//        private fun initializePlayer(path: String) {
-//            player = ExoPlayer.Builder(itemBinding.root.context).build().also {
-//                val mediaItem = MediaItem.fromUri(path)
-//                it.setMediaItem(mediaItem)
-//            }
-//            itemBinding.videoView.player = player
-//
-//        }
+        private fun initializePlayer(path: String) {
+            player = ExoPlayer.Builder(itemBinding.root.context).build().also {
+                val mediaItem = MediaItem.fromUri(path)
+                it.setMediaItem(mediaItem)
+            }
+            itemBinding.videoView.player = player
+
+        }
     }
 
 
