@@ -30,18 +30,21 @@ class RvMainActivity : AppCompatActivity() {
         videos.add(RvModel(1, test1, 0L, false))
         videos.add(RvModel(2, test2, 0L, false))
         videos.add(RvModel(3, test3, 0L, false))
+        videos.add(RvModel(4, test1, 0L, false))
+        videos.add(RvModel(5, test2, 0L, false))
+        videos.add(RvModel(6, test3, 0L, false))
 
         mainAdapter = RvMainAdapter(object : RvMainAdapter.Callback {
             override fun callback(selectedItem: RvModel) {
 
-                Log.e("3", "33 / ${mainAdapter.viewHolders.size}")
+//                Log.e("3", "33 / ${mainAdapter.viewHolders.size}")
                 Log.e("3", "34 / ${videos.size}")
 
                 mainAdapter.exoPlayer?.release()
 
                 videos.forEachIndexed { index, item ->
                     if (selectedItem.id == item.id) {
-                        videos[index] = videos[index].copy(playWhenReady = !item.playWhenReady)
+                        videos[index] = selectedItem.copy(playWhenReady = !item.playWhenReady)
                     } else {
                         videos[index] = videos[index].copy(playWhenReady = false)
                     }

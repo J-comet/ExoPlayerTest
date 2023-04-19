@@ -3,6 +3,7 @@ package hs.project.exoplayertest.recyclerview
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
@@ -49,20 +50,29 @@ class RvMainAdapter(private val callback: Callback) :
     inner class ViewHolder(val itemBinding: ItemRvMainBinding) :
         RecyclerView.ViewHolder(itemBinding.root) {
 
-        init {
-            itemBinding.ivPlay.setOnClickListener {
-                callback.callback(datas[bindingAdapterPosition])
-            }
-        }
+        var playStatus = false
+//        var isFirstPlay = true
+        var playBackPosition = 0L
 
         fun bind(item: RvModel) {
 
             Log.e("item", "item / $item")
 
-//            if (exoPlayer != null) {
-//                Log.e("item", "해제!!!")
-//                exoPlayer = null
-//            }
+            itemBinding.ivPlay.setOnClickListener {
+                if (playStatus) {
+                    itemBinding.playerView.player?.playWhenReady = false
+//                    isFirstPlay = false
+                } else {
+                    Log.e("STATE_READY", "playBackPosition / $playBackPosition")
+                    callback.callback(datas[bindingAdapterPosition].copy(playbackPosition = playBackPosition))
+//                    if (isFirstPlay) {
+//                        callback.callback(datas[bindingAdapterPosition].copy(playbackPosition = playBackPosition))
+//                    } else {
+//                        itemBinding.playerView.player?.playWhenReady = true
+//                    }
+                }
+            }
+
 
             exoPlayer = ExoPlayer.Builder(itemBinding.root.context).build().also {
                 val mediaItem = MediaItem.fromUri(item.videoPath)
@@ -79,13 +89,19 @@ class RvMainAdapter(private val callback: Callback) :
                                 // playWhenReady == false 이면 미디어 일시중지
                                 // 즉시 재생 불가능, 준비만 된 상태
                                 Log.e("STATE_READY", "준비")
+                                itemBinding.progress.isVisible = false
+                                itemBinding.ivPlay.isVisible = true
                             }
                             Player.STATE_ENDED -> {
                                 // 재생 완료
                             }
                             Player.STATE_BUFFERING ->{
+                                itemBinding.ivPlay.isVisible = false
+                                itemBinding.progress.isVisible = true
                             }
                             Player.STATE_IDLE -> {
+                                itemBinding.ivPlay.isVisible = false
+                                itemBinding.progress.isVisible = true
                             }
                             else -> Unit
                         }
@@ -93,27 +109,16 @@ class RvMainAdapter(private val callback: Callback) :
 
                     override fun onIsPlayingChanged(isPlaying: Boolean) {
                         super.onIsPlayingChanged(isPlaying)
-
-                        /**
-                         * 현재 무한 루프 도는 중
-                         */
-//                        if (isPlaying) {
-//                            callback.callback(datas[position])
-//                        }
-
-//                        if (isPlaying) {
-//                            binding.videoView2.player?.playWhenReady = false
-//                            binding.videoView3.player?.playWhenReady = false
-//                        } else {
-//                            playWhenReady = it.playWhenReady
-//                            playbackPosition = it.currentPosition
-//                        }
-
+                        playStatus = isPlaying
+                        if (!isPlaying) {
+                            playBackPosition = it.currentPosition
+                            Log.e("STATE_READY", "currentPosition / $playBackPosition")
+                        }
                     }
 
                     override fun onPlayerError(error: PlaybackException) {
                         super.onPlayerError(error)
-                        Log.e("ERROR", "ERROR".plus(error.localizedMessage.toString()))
+                        Log.e("ERROR", "ERROR / ".plus(error.localizedMessage.toString()))
                     }
                 })
             }
