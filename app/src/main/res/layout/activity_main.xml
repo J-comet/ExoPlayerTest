@@ -4,22 +4,45 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     tools:context=".MainActivity">
 
     <com.google.android.exoplayer2.ui.PlayerView
         android:id="@+id/video_view"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        app:resize_mode="fill"
+        app:layout_constraintBottom_toTopOf="@+id/video_view2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.exoplayer2.ui.PlayerView
+        android:id="@+id/video_view2"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        app:resize_mode="fill"
+        app:layout_constraintBottom_toTopOf="@+id/video_view3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/video_view" />
+
+    <com.google.android.exoplayer2.ui.PlayerView
+        android:id="@+id/video_view3"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        app:resize_mode="fill"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/video_view2" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btn_recyclerview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="리싸이클러뷰"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/video_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -30,6 +53,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="커스텀 리싸이클러뷰"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/btn_recyclerview"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

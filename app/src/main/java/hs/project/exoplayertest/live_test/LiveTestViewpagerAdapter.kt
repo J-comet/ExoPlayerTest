@@ -1,19 +1,20 @@
 package hs.project.exoplayertest.live_test
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager2.widget.ViewPager2
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.PlaybackException
+import com.google.android.exoplayer2.Player
 import hs.project.exoplayertest.databinding.ItemLiveVideoViewpagerBinding
 import hs.project.exoplayertest.live_test.model.LiveVideoViewPager
-import hs.project.exoplayertest.recyclerview.ViewPagerAdapter
 
 
-class LiveTestViewpagerAdapter :
+class LiveTestViewpagerAdapter(private var exoPlayer: ExoPlayer?) :
     ListAdapter<LiveVideoViewPager, LiveTestViewpagerAdapter.ViewHolder>(
         object : DiffUtil.ItemCallback<LiveVideoViewPager?>() {
             override fun areItemsTheSame(
@@ -48,26 +49,69 @@ class LiveTestViewpagerAdapter :
 
     override fun onViewRecycled(holder: ViewHolder) {
         super.onViewRecycled(holder)
+        holder.exoPlayerRelease()
 //        holder.itemBinding.playerView.player?.release()
     }
 
     inner class ViewHolder(
-        val itemBinding: ItemLiveVideoViewpagerBinding,
+        private val itemBinding: ItemLiveVideoViewpagerBinding,
     ) : RecyclerView.ViewHolder(itemBinding.root) {
 
-        private var player: ExoPlayer? = null
-
         fun bind(item: LiveVideoViewPager) {
-            initializePlayer(item.videoPath)
+            initPlayer(item.videoPath)
         }
 
-        private fun initializePlayer(path: String) {
-            player = ExoPlayer.Builder(itemBinding.root.context).build().also {
+        private fun initPlayer(path: String) {
+
+            Log.e("VIEWPAGER", "$exoPlayer")
+
+            exoPlayer?.also {
                 val mediaItem = MediaItem.fromUri(path)
                 it.setMediaItem(mediaItem)
                 it.playWhenReady = false
+                it.addListener(object : Player.Listener {
+                    override fun onPlayerError(error: PlaybackException) {
+                        super.onPlayerError(error)
+                        Log.e("VIEWPAGER", error.message.toString())
+                    }
+
+                    override fun onPlaybackStateChanged(playbackState: Int) {
+                        super.onPlaybackStateChanged(playbackState)
+                        when (playbackState) {
+                            Player.STATE_READY -> {
+                                // playWhenReady == true 이면 미디어 재생이 시작
+                                // playWhenReady == false 이면 미디어 일시중지
+                                // 즉시 재생 불가능, 준비만 된 상태
+                                Log.e("VIEWPAGER", "STATE_READY")
+                                exoPlayer?.play()
+                            }
+
+                            Player.STATE_ENDED -> {
+                                // 재생 완료
+                                Log.e("VIEWPAGER", "STATE_ENDED")
+                            }
+
+                            Player.STATE_BUFFERING -> {
+                                Log.e("VIEWPAGER", "STATE_BUFFERING")
+                            }
+
+                            Player.STATE_IDLE -> {
+                                Log.e("VIEWPAGER", "STATE_IDLE")
+                            }
+
+                            else -> Unit
+                        }
+                    }
+                })
             }
-            itemBinding.playerView.player = player
+            itemBinding.playerView.player = exoPlayer
+        }
+
+        fun exoPlayerRelease() {
+            exoPlayer?.let {
+                it.release()
+                exoPlayer = null
+            }
         }
     }
 }

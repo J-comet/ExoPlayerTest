@@ -12,6 +12,8 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerView
 import hs.project.exoplayertest.R
+import hs.project.exoplayertest.databinding.ItemLiveVideoBinding
+import hs.project.exoplayertest.databinding.ItemPlayerViewBinding
 
 class LifecycleAdapter(private val videoUrls: List<String>, private val lifecycleOwner: LifecycleOwner) :
     RecyclerView.Adapter<LifecycleAdapter.VideoViewHolder>() {
@@ -19,8 +21,13 @@ class LifecycleAdapter(private val videoUrls: List<String>, private val lifecycl
     private var player: ExoPlayer? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
+        val binding = ItemPlayerViewBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
         val playerView = LayoutInflater.from(parent.context).inflate(R.layout.item_player_view, parent, false)
-        return VideoViewHolder(playerView)
+        return VideoViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
@@ -34,14 +41,14 @@ class LifecycleAdapter(private val videoUrls: List<String>, private val lifecycl
         super.onViewDetachedFromWindow(holder)
     }
 
-    inner class VideoViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
+    inner class VideoViewHolder(private val itemBinding: ItemPlayerViewBinding) : RecyclerView.ViewHolder(itemBinding.root) {
 
         fun bind(videoUrl: String) {
             releasePlayer()
-            val playerView = view.findViewById<PlayerView>(R.id.player)
+//            val playerView = view.findViewById<PlayerView>(R.id.player)
 
-            val player = ExoPlayer.Builder(playerView.context).build()
-            playerView.player = player
+            val player = ExoPlayer.Builder(itemBinding.root.context).build()
+            itemBinding.playerView.player = player
 
             val mediaItem = MediaItem.fromUri(Uri.parse(videoUrl))
             player.setMediaItem(mediaItem)
@@ -53,18 +60,14 @@ class LifecycleAdapter(private val videoUrls: List<String>, private val lifecycl
 //            player.setMediaSource(mediaSource)
             player.prepare()
 
-            player.playWhenReady = true
-            player.repeatMode = Player.REPEAT_MODE_ALL
+            player.playWhenReady = false
+            player.repeatMode = Player.REPEAT_MODE_OFF
+            player.seekTo(0L)
 
-            player.let {
-                it.playWhenReady = true
-                it.seekTo(0L)
-            }
+            itemBinding.playerView.setShowNextButton(false)
+            itemBinding.playerView.setShowPreviousButton(false)
 
-            playerView.setShowNextButton(false)
-            playerView.setShowPreviousButton(false)
-
-            playerView.onResume()
+            itemBinding.playerView.onResume()
             lifecycleOwner.lifecycle.addObserver(object : DefaultLifecycleObserver {
                 override fun onPause(owner: LifecycleOwner) {
                     player.playWhenReady = false

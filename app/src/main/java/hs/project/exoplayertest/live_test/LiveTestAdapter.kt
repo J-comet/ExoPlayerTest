@@ -55,7 +55,12 @@ class LiveTestAdapter :
         private var player: ExoPlayer? = null
 
         fun bind(item: LiveVideo) {
-            val viewPagerAdapter = LiveTestViewpagerAdapter()
+            player = ExoPlayer.Builder(itemBinding.root.context).build()
+            itemBinding.tvPage.text =
+                "1/${item.viewpagerList.size}"
+
+            itemBinding.vpVideo.id = bindingAdapterPosition + 1
+            val viewPagerAdapter = LiveTestViewpagerAdapter(player)
 
             with(itemBinding.vpVideo) {
                 adapter = viewPagerAdapter
@@ -64,6 +69,8 @@ class LiveTestAdapter :
                 registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                     override fun onPageSelected(position: Int) {
                         super.onPageSelected(position)
+                        itemBinding.tvPage.text =
+                            "${position + 1}/${item.viewpagerList.size}"
                     }
                 })
             }
