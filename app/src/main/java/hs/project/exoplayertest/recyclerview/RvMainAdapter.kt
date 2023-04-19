@@ -20,14 +20,26 @@ class RvMainAdapter(private val callback: Callback) :
         fun callback(selected: RvModel)
     }
 
+    override fun onViewAttachedToWindow(holder: ViewHolder) {
+        super.onViewAttachedToWindow(holder)
+        Log.e("33", "Attached")
+        holder.bind(datas[holder.bindingAdapterPosition])
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemRvMainBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(datas[position], position)
+//        holder.bind(datas[position])
         viewHolders.add(holder)
+    }
+
+    override fun onViewDetachedFromWindow(holder: ViewHolder) {
+        super.onViewDetachedFromWindow(holder)
+        Log.e("33", "Detached")
+        holder.itemBinding.playerView.player?.release()
     }
 
     override fun getItemCount(): Int {
@@ -37,7 +49,13 @@ class RvMainAdapter(private val callback: Callback) :
     inner class ViewHolder(val itemBinding: ItemRvMainBinding) :
         RecyclerView.ViewHolder(itemBinding.root) {
 
-        fun bind(item: RvModel, position: Int) {
+        init {
+            itemBinding.ivPlay.setOnClickListener {
+                callback.callback(datas[bindingAdapterPosition])
+            }
+        }
+
+        fun bind(item: RvModel) {
 
             Log.e("item", "item / $item")
 
@@ -101,10 +119,6 @@ class RvMainAdapter(private val callback: Callback) :
             }
 
             itemBinding.playerView.player = exoPlayer
-
-            itemBinding.ivPlay.setOnClickListener {
-                callback.callback(datas[position])
-            }
 
         }
     }
