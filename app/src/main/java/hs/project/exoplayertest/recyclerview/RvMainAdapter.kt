@@ -76,7 +76,15 @@ class RvMainAdapter(private val callback: Callback) :
                 it.playWhenReady = item.playWhenReady
                 it.seekTo(item.playbackPosition)
                 it.prepare()
+
                 it.addListener(object : Player.Listener {
+                    override fun onRenderedFirstFrame() {
+                        super.onRenderedFirstFrame()
+
+                        // 첫 프레임이 그려진 뒤에 썸네일 이미지뷰를 없앤다. (재생 전 깜빡이는 현상 방지)
+                        itemBinding.ivThumbnail.isVisible = false
+                    }
+
                     override fun onPlaybackStateChanged(playbackState: Int) {
                         super.onPlaybackStateChanged(playbackState)
                         when (playbackState) {

@@ -9,9 +9,17 @@
         android:id="@+id/player_view"
         android:layout_width="match_parent"
         android:layout_height="200dp"
+        app:shutter_background_color="@android:color/transparent"
         app:layout_constraintTop_toTopOf="parent"
         app:use_controller="false"
         app:resize_mode="fill" />
+
+    <ImageView
+        android:id="@+id/iv_thumbnail"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:background="@android:color/holo_red_dark"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/iv_play"
