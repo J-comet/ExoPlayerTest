@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.PlaybackException
 import com.google.android.exoplayer2.Player
 import hs.project.exoplayertest.databinding.ItemRvMainBinding
 
@@ -16,7 +17,7 @@ class RvMainAdapter(private val callback: Callback) :
     var exoPlayer: ExoPlayer? = null
 
     interface Callback {
-        fun callback(selected: ArrayList<RvMainAdapter.ViewHolder>)
+        fun callback(selected: RvModel)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -25,12 +26,9 @@ class RvMainAdapter(private val callback: Callback) :
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(datas[position])
+        holder.bind(datas[position], position)
         viewHolders.add(holder)
-
-        holder.itemBinding.root.setOnClickListener {
-            callback.callback(viewHolders)
-        }
+//        viewHolders.add(holder)
     }
 
     override fun getItemCount(): Int {
@@ -40,12 +38,14 @@ class RvMainAdapter(private val callback: Callback) :
     inner class ViewHolder(val itemBinding: ItemRvMainBinding) :
         RecyclerView.ViewHolder(itemBinding.root) {
 
-        fun bind(item: RvModel) {
+        fun bind(item: RvModel, position: Int) {
+
+            Log.e("item", "item / $item")
 
             exoPlayer = ExoPlayer.Builder(itemBinding.root.context).build().also {
                 val mediaItem = MediaItem.fromUri(item.videoPath)
                 it.setMediaItem(mediaItem)
-                it.playWhenReady = item.playWhenReady
+//                it.playWhenReady = item.playWhenReady
                 it.seekTo(item.playbackPosition)
                 it.prepare()
                 it.addListener(object : Player.Listener {
@@ -56,7 +56,7 @@ class RvMainAdapter(private val callback: Callback) :
                                 // playWhenReady == true 이면 미디어 재생이 시작
                                 // playWhenReady == false 이면 미디어 일시중지
                                 // 즉시 재생 불가능, 준비만 된 상태
-
+                                Log.e("STATE_READY", "준비")
                             }
                             Player.STATE_ENDED -> {
                                 // 재생 완료
@@ -72,6 +72,13 @@ class RvMainAdapter(private val callback: Callback) :
                     override fun onIsPlayingChanged(isPlaying: Boolean) {
                         super.onIsPlayingChanged(isPlaying)
 
+                        /**
+                         * 현재 무한 루프 도는 중
+                         */
+                        if (isPlaying) {
+                            callback.callback(datas[position])
+                        }
+
 //                        if (isPlaying) {
 //                            binding.videoView2.player?.playWhenReady = false
 //                            binding.videoView3.player?.playWhenReady = false
@@ -80,6 +87,11 @@ class RvMainAdapter(private val callback: Callback) :
 //                            playbackPosition = it.currentPosition
 //                        }
 
+                    }
+
+                    override fun onPlayerError(error: PlaybackException) {
+                        super.onPlayerError(error)
+                        Log.e("ERROR", "ERROR".plus(error.localizedMessage.toString()))
                     }
                 })
             }
