@@ -45,7 +45,9 @@ class RvMainActivity : AppCompatActivity() {
                 videos.forEachIndexed { index, item ->
                     if (selectedItem.id == item.id) {
                         videos[index] = selectedItem.copy(playWhenReady = !item.playWhenReady)
+//                        mainAdapter.viewHolders[index].itemBinding.playerView.player?.playWhenReady = !mainAdapter.viewHolders[index].itemBinding.playerView.player?.playWhenReady!!
                     } else {
+//                        mainAdapter.viewHolders[index].itemBinding.playerView.player?.playWhenReady = false
                         videos[index] = videos[index].copy(playWhenReady = false)
                     }
                 }

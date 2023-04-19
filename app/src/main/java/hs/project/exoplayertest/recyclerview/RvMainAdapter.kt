@@ -50,27 +50,23 @@ class RvMainAdapter(private val callback: Callback) :
     inner class ViewHolder(val itemBinding: ItemRvMainBinding) :
         RecyclerView.ViewHolder(itemBinding.root) {
 
-        var playStatus = false
-//        var isFirstPlay = true
-        var playBackPosition = 0L
+//        var playStatus = false
+//        var playBackPosition = 0L
 
         fun bind(item: RvModel) {
 
             Log.e("item", "item / $item")
 
             itemBinding.ivPlay.setOnClickListener {
-                if (playStatus) {
-                    itemBinding.playerView.player?.playWhenReady = false
-//                    isFirstPlay = false
-                } else {
-                    Log.e("STATE_READY", "playBackPosition / $playBackPosition")
-                    callback.callback(datas[bindingAdapterPosition].copy(playbackPosition = playBackPosition))
-//                    if (isFirstPlay) {
-//                        callback.callback(datas[bindingAdapterPosition].copy(playbackPosition = playBackPosition))
-//                    } else {
-//                        itemBinding.playerView.player?.playWhenReady = true
-//                    }
-                }
+
+                callback.callback(datas[bindingAdapterPosition].copy(playbackPosition = itemBinding.playerView.player?.currentPosition ?: 0L, playWhenReady = itemBinding.playerView.player?.playWhenReady ?: false))
+
+//                if (playStatus) {
+//                    itemBinding.playerView.player?.playWhenReady = false
+//                } else {
+//                    Log.e("STATE_READY", "playBackPosition / $playBackPosition")
+//                    callback.callback(datas[bindingAdapterPosition].copy(playbackPosition = playBackPosition, playWhenReady = itemBinding.playerView.player?.playWhenReady ?: false))
+//                }
             }
 
 
@@ -109,11 +105,11 @@ class RvMainAdapter(private val callback: Callback) :
 
                     override fun onIsPlayingChanged(isPlaying: Boolean) {
                         super.onIsPlayingChanged(isPlaying)
-                        playStatus = isPlaying
-                        if (!isPlaying) {
-                            playBackPosition = it.currentPosition
-                            Log.e("STATE_READY", "currentPosition / $playBackPosition")
-                        }
+//                        playStatus = isPlaying
+//                        if (!isPlaying) {
+//                            playBackPosition = it.currentPosition
+//                            Log.e("STATE_READY", "currentPosition / $playBackPosition")
+//                        }
                     }
 
                     override fun onPlayerError(error: PlaybackException) {
