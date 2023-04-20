@@ -1,14 +1,18 @@
 package hs.project.exoplayertest.recyclerview
 
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.PlaybackException
 import com.google.android.exoplayer2.Player
+import hs.project.exoplayertest.R
 import hs.project.exoplayertest.databinding.ItemRvMainBinding
 
 class RvMainAdapter(private val callback: Callback) :
@@ -50,23 +54,22 @@ class RvMainAdapter(private val callback: Callback) :
     inner class ViewHolder(val itemBinding: ItemRvMainBinding) :
         RecyclerView.ViewHolder(itemBinding.root) {
 
-//        var playStatus = false
-//        var playBackPosition = 0L
-
         fun bind(item: RvModel) {
 
             Log.e("item", "item / $item")
 
-            itemBinding.ivPlay.setOnClickListener {
+            if (item.playWhenReady) {
+                itemBinding.ivPlayPause.setImageResource(R.drawable.icn_live_video_pause)
+            } else {
+                itemBinding.ivPlayPause.setImageResource(R.drawable.icn_live_video_play)
+            }
 
+            itemBinding.ivPlayPause.setOnClickListener {
                 callback.callback(datas[bindingAdapterPosition].copy(playbackPosition = itemBinding.playerView.player?.currentPosition ?: 0L, playWhenReady = itemBinding.playerView.player?.playWhenReady ?: false))
+            }
 
-//                if (playStatus) {
-//                    itemBinding.playerView.player?.playWhenReady = false
-//                } else {
-//                    Log.e("STATE_READY", "playBackPosition / $playBackPosition")
-//                    callback.callback(datas[bindingAdapterPosition].copy(playbackPosition = playBackPosition, playWhenReady = itemBinding.playerView.player?.playWhenReady ?: false))
-//                }
+            itemBinding.playerView.setOnClickListener {
+                showBtnPlayPause()
             }
 
 
@@ -94,17 +97,17 @@ class RvMainAdapter(private val callback: Callback) :
                                 // 즉시 재생 불가능, 준비만 된 상태
                                 Log.e("STATE_READY", "준비")
                                 itemBinding.progress.isVisible = false
-                                itemBinding.ivPlay.isVisible = true
+                                itemBinding.ivPlayPause.isVisible = true
                             }
                             Player.STATE_ENDED -> {
                                 // 재생 완료
                             }
                             Player.STATE_BUFFERING ->{
-                                itemBinding.ivPlay.isVisible = false
+                                itemBinding.ivPlayPause.isVisible = false
                                 itemBinding.progress.isVisible = true
                             }
                             Player.STATE_IDLE -> {
-                                itemBinding.ivPlay.isVisible = false
+                                itemBinding.ivPlayPause.isVisible = false
                                 itemBinding.progress.isVisible = true
                             }
                             else -> Unit
@@ -113,11 +116,9 @@ class RvMainAdapter(private val callback: Callback) :
 
                     override fun onIsPlayingChanged(isPlaying: Boolean) {
                         super.onIsPlayingChanged(isPlaying)
-//                        playStatus = isPlaying
-//                        if (!isPlaying) {
-//                            playBackPosition = it.currentPosition
-//                            Log.e("STATE_READY", "currentPosition / $playBackPosition")
-//                        }
+                        if (isPlaying) {
+                            hideBtnPlayPause()
+                        }
                     }
 
                     override fun onPlayerError(error: PlaybackException) {
@@ -126,9 +127,21 @@ class RvMainAdapter(private val callback: Callback) :
                     }
                 })
             }
-
             itemBinding.playerView.player = exoPlayer
-
         }
+
+        private fun hideBtnPlayPause() {
+            Handler(Looper.getMainLooper()).postDelayed({
+                itemBinding.ivPlayPause.isVisible = false
+            }, 3000)
+        }
+
+        private fun showBtnPlayPause() {
+            itemBinding.ivPlayPause.isVisible = true
+            Handler(Looper.getMainLooper()).postDelayed({
+                itemBinding.ivPlayPause.isVisible = false
+            }, 3000)
+        }
+
     }
 }

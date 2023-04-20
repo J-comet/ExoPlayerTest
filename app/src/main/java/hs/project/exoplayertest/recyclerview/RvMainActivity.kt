@@ -40,7 +40,7 @@ class RvMainActivity : AppCompatActivity() {
 //                Log.e("3", "33 / ${mainAdapter.viewHolders.size}")
                 Log.e("3", "34 / ${videos.size}")
 
-                mainAdapter.exoPlayer?.release()
+//                mainAdapter.exoPlayer?.release()
 
                 videos.forEachIndexed { index, item ->
                     if (selectedItem.id == item.id) {
@@ -66,6 +66,8 @@ class RvMainActivity : AppCompatActivity() {
         with(binding.rvList) {
             adapter = mainAdapter
             layoutManager = LinearLayoutManager(this@RvMainActivity)
+            itemAnimator = null
+            animation = null
         }
 
         mainAdapter.datas = videos
