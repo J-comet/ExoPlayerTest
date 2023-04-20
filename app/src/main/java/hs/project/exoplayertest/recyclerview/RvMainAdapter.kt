@@ -1,5 +1,6 @@
 package hs.project.exoplayertest.recyclerview
 
+import android.media.MediaMetadataRetriever
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -8,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.PlaybackException
@@ -56,9 +58,21 @@ class RvMainAdapter(private val callback: Callback) :
     inner class ViewHolder(val itemBinding: ItemRvMainBinding) :
         RecyclerView.ViewHolder(itemBinding.root) {
 
+        private val times = 1000000L
+
         fun bind(item: RvModel) {
 
             Log.e("item", "item / $item")
+
+//            val mediaMetadataRetriever = MediaMetadataRetriever()
+//            mediaMetadataRetriever.setDataSource(item.videoPath)
+//            val bitmap = mediaMetadataRetriever.getFrameAtTime(6 * times) //6초 영상 추출
+
+            if (item.innerInfo.thumbnail == null) {
+                Glide.with(itemBinding.root).load(item.innerInfo.defaultThumbnail).centerCrop().into(itemBinding.ivThumbnail)
+            } else {
+//                Glide.with(itemBinding.root).load(bitmap).into(itemBinding.ivThumbnail)
+            }
 
             if (item.innerInfo.isPlay) {
                 itemBinding.ivPlayPause.setImageResource(R.drawable.icn_live_video_pause)
@@ -95,9 +109,8 @@ class RvMainAdapter(private val callback: Callback) :
                 it.addListener(object : Player.Listener {
                     override fun onRenderedFirstFrame() {
                         super.onRenderedFirstFrame()
-
-                        // 첫 프레임이 그려진 뒤에 썸네일 이미지뷰를 없앤다. (재생 전 깜빡이는 현상 방지)
-                        itemBinding.ivThumbnail.isVisible = false
+                        // 첫 프레임이 그려진 뒤에 썸네일 이미지뷰를 없앤다.
+//                        itemBinding.ivThumbnail.isVisible = false
                     }
 
                     override fun onPlaybackStateChanged(playbackState: Int) {
@@ -133,6 +146,7 @@ class RvMainAdapter(private val callback: Callback) :
                     override fun onIsPlayingChanged(isPlaying: Boolean) {
                         super.onIsPlayingChanged(isPlaying)
                         if (isPlaying) {
+                            itemBinding.ivThumbnail.isVisible = false
                             hideBtnPlayPause()
                         }
                     }
