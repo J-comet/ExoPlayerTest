@@ -1,6 +1,7 @@
 package hs.project.exoplayertest.recyclerview
 
 import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -37,6 +38,8 @@ class RvMainActivity : AppCompatActivity() {
 
     private val videos = arrayListOf<RvModel>()
 
+    private val times = 1000000L
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -50,18 +53,22 @@ class RvMainActivity : AppCompatActivity() {
         mainAdapter = RvMainAdapter(object : RvMainAdapter.Callback {
             override fun callback(selectedItem: RvModel) {
 
-//                Log.e("3", "33 / ${mainAdapter.viewHolders.size}")
                 Log.e("3", "34 / ${videos.size}")
 
 //                mainAdapter.exoPlayer?.release()
 
                 videos.forEachIndexed { index, item ->
                     if (selectedItem.id == item.id) {
-                        videos[index] = selectedItem.copy(innerInfo = selectedItem.innerInfo.copy(isPlay = !selectedItem.innerInfo.isPlay))
-//                        mainAdapter.viewHolders[index].itemBinding.playerView.player?.playWhenReady = !mainAdapter.viewHolders[index].itemBinding.playerView.player?.playWhenReady!!
+
+                        videos[index] = selectedItem.copy(
+                            innerInfo = selectedItem.innerInfo.copy(
+                                isPlay = !selectedItem.innerInfo.isPlay
+                            )
+                        )
+
                     } else {
-//                        mainAdapter.viewHolders[index].itemBinding.playerView.player?.playWhenReady = false
-                        videos[index] = videos[index].copy(innerInfo = videos[index].innerInfo.copy(isPlay = false))
+                        videos[index] =
+                            videos[index].copy(innerInfo = videos[index].innerInfo.copy(isPlay = false))
                     }
                 }
 //
@@ -72,7 +79,8 @@ class RvMainActivity : AppCompatActivity() {
 //                mainAdapter.datas = videos
                 mainAdapter.notifyDataSetChanged()
 
-                Toast.makeText(this@RvMainActivity, selectedItem.id.toString(), Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@RvMainActivity, selectedItem.id.toString(), Toast.LENGTH_SHORT)
+                    .show()
             }
         })
 

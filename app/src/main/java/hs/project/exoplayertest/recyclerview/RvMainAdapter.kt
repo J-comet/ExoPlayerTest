@@ -5,9 +5,8 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.ExoPlayer
@@ -23,7 +22,6 @@ class RvMainAdapter(private val callback: Callback) :
     var dataInfos = ArrayList<RvModelInnerInfo>()
 
     //    var viewHolders = ArrayList<RvMainAdapter.ViewHolder>()
-    var exoPlayer: ExoPlayer? = null
 
     interface Callback {
         fun callback(selected: RvModel)
@@ -32,7 +30,8 @@ class RvMainAdapter(private val callback: Callback) :
     override fun onViewAttachedToWindow(holder: ViewHolder) {
         super.onViewAttachedToWindow(holder)
         Log.e("33", "Attached")
-        holder.bind(datas[holder.bindingAdapterPosition])
+        holder.exoPlayerBind(datas[holder.bindingAdapterPosition])
+//        holder.bind(datas[holder.bindingAdapterPosition])
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -41,6 +40,7 @@ class RvMainAdapter(private val callback: Callback) :
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.bind(datas[position])
 //        holder.bind(datas[position])
 //        dataInfos.add(holder)
     }
@@ -58,35 +58,40 @@ class RvMainAdapter(private val callback: Callback) :
     inner class ViewHolder(val itemBinding: ItemRvMainBinding) :
         RecyclerView.ViewHolder(itemBinding.root) {
 
-        private val times = 1000000L
+        var exoPlayer: ExoPlayer? = null
 
         fun bind(item: RvModel) {
 
-            Log.e("item", "item / $item")
+            Log.e("item", "item 111 / ${item.videoPath}")
 
-//            val mediaMetadataRetriever = MediaMetadataRetriever()
-//            mediaMetadataRetriever.setDataSource(item.videoPath)
-//            val bitmap = mediaMetadataRetriever.getFrameAtTime(6 * times) //6초 영상 추출
+//            Glide.with(itemBinding.root).clear(itemBinding.ivThumbnail)
 
             if (item.innerInfo.thumbnail == null) {
                 Glide.with(itemBinding.root).load(item.innerInfo.defaultThumbnail).centerCrop().into(itemBinding.ivThumbnail)
             } else {
-//                Glide.with(itemBinding.root).load(bitmap).into(itemBinding.ivThumbnail)
+                Glide.with(itemBinding.root).load(item.innerInfo.thumbnail).centerCrop().into(itemBinding.ivThumbnail)
             }
+
+            itemBinding.ivThumbnail.visibility = View.VISIBLE
 
             if (item.innerInfo.isPlay) {
                 itemBinding.ivPlayPause.setImageResource(R.drawable.icn_live_video_pause)
             } else {
                 itemBinding.ivPlayPause.setImageResource(R.drawable.icn_live_video_play)
-                itemBinding.ivPlayPause.isVisible = true
             }
 
             itemBinding.ivPlayPause.setOnClickListener {
+
+//                val mediaMetadataRetriever = MediaMetadataRetriever()
+//                mediaMetadataRetriever.setDataSource(item.videoPath)
+//                val bitmap = mediaMetadataRetriever.getFrameAtTime(item.innerInfo.seekTime * 1000)
+
                 callback.callback(
-                    datas[bindingAdapterPosition].copy(
-                        innerInfo = datas[bindingAdapterPosition].innerInfo.copy(
+                    item.copy(
+                        innerInfo = item.innerInfo.copy(
                             seekTime = itemBinding.playerView.player?.currentPosition ?: 0L,
-                            isPlay = itemBinding.playerView.player?.playWhenReady ?: false
+                            isPlay = itemBinding.playerView.player?.playWhenReady ?: false,
+                            thumbnail = null
                         )
                     )
                 )
@@ -97,8 +102,9 @@ class RvMainAdapter(private val callback: Callback) :
                     showBtnPlayPause()
                 }
             }
+        }
 
-
+        fun exoPlayerBind(item: RvModel) {
             exoPlayer = ExoPlayer.Builder(itemBinding.root.context).build().also {
                 val mediaItem = MediaItem.fromUri(item.videoPath)
                 it.setMediaItem(mediaItem)
@@ -121,8 +127,17 @@ class RvMainAdapter(private val callback: Callback) :
                                 // playWhenReady == false 이면 미디어 일시중지
                                 // 즉시 재생 불가능, 준비만 된 상태
                                 Log.e("STATE_READY", "준비")
-                                itemBinding.progress.isVisible = false
-                                itemBinding.ivPlayPause.isVisible = true
+                                itemBinding.progress.visibility = View.INVISIBLE
+                                itemBinding.ivPlayPause.visibility = View.VISIBLE
+                                itemBinding.playerView.visibility = View.VISIBLE
+
+//                                if (itemBinding.playerView.player?.playWhenReady == true) {
+//                                    itemBinding.ivThumbnail.visibility = View.INVISIBLE
+//                                    itemBinding.playerView.visibility = View.VISIBLE
+//                                } else {
+//                                    itemBinding.ivThumbnail.visibility = View.VISIBLE
+//                                    itemBinding.playerView.visibility = View.INVISIBLE
+//                                }
                             }
 
                             Player.STATE_ENDED -> {
@@ -130,15 +145,14 @@ class RvMainAdapter(private val callback: Callback) :
                             }
 
                             Player.STATE_BUFFERING -> {
-                                itemBinding.ivPlayPause.isVisible = false
-                                itemBinding.progress.isVisible = true
+                                itemBinding.ivPlayPause.visibility = View.INVISIBLE
+                                itemBinding.progress.visibility = View.VISIBLE
                             }
 
                             Player.STATE_IDLE -> {
-                                itemBinding.ivPlayPause.isVisible = false
-                                itemBinding.progress.isVisible = true
+                                itemBinding.ivPlayPause.visibility = View.INVISIBLE
+                                itemBinding.progress.visibility = View.VISIBLE
                             }
-
                             else -> Unit
                         }
                     }
@@ -146,7 +160,8 @@ class RvMainAdapter(private val callback: Callback) :
                     override fun onIsPlayingChanged(isPlaying: Boolean) {
                         super.onIsPlayingChanged(isPlaying)
                         if (isPlaying) {
-                            itemBinding.ivThumbnail.isVisible = false
+                            itemBinding.ivPlayPause.visibility = View.VISIBLE
+                            itemBinding.ivThumbnail.visibility = View.INVISIBLE
                             hideBtnPlayPause()
                         }
                     }
@@ -162,14 +177,14 @@ class RvMainAdapter(private val callback: Callback) :
 
         private fun hideBtnPlayPause() {
             Handler(Looper.getMainLooper()).postDelayed({
-                itemBinding.ivPlayPause.isVisible = false
+                itemBinding.ivPlayPause.visibility = View.INVISIBLE
             }, 3000)
         }
 
         private fun showBtnPlayPause() {
-            itemBinding.ivPlayPause.isVisible = true
+            itemBinding.ivThumbnail.visibility = View.VISIBLE
             Handler(Looper.getMainLooper()).postDelayed({
-                itemBinding.ivPlayPause.isVisible = false
+                itemBinding.ivPlayPause.visibility = View.INVISIBLE
             }, 3000)
         }
 
