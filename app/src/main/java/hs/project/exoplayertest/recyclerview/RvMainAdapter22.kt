@@ -12,12 +12,12 @@ import hs.project.exoplayertest.databinding.ItemRvMainBinding
 
 class RvMainAdapter22(private val callback: RvMainAdapter22.Callback) :
     RecyclerView.Adapter<RvMainAdapter22.ViewHolder>() {
-    var datas = ArrayList<RvModel>()
+    var datas = ArrayList<RvModel22>()
     var viewHolders = ArrayList<RvMainAdapter22.ViewHolder>()
     var exoPlayer: ExoPlayer? = null
 
     interface Callback {
-        fun callback(selected: RvModel, position: Int)
+        fun callback(selected: RvModel22, position: Int)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -38,7 +38,7 @@ class RvMainAdapter22(private val callback: RvMainAdapter22.Callback) :
     inner class ViewHolder(val itemBinding: ItemRvMainBinding) :
         RecyclerView.ViewHolder(itemBinding.root) {
 
-        fun bind(item: RvModel, position: Int) {
+        fun bind(item: RvModel22, position: Int) {
 
             Log.e("item", "item / $item")
 

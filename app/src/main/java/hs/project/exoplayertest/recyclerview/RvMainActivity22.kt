@@ -20,18 +20,18 @@ class RvMainActivity22 : AppCompatActivity() {
     private val test3 =
         "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
 
-    private val videos = arrayListOf<RvModel>()
+    private val videos = arrayListOf<RvModel22>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        videos.add(RvModel(1, test1, 0L, false))
-        videos.add(RvModel(2, test2, 0L, false))
-        videos.add(RvModel(3, test3, 0L, false))
+        videos.add(RvModel22(1, test1, 0L, false))
+        videos.add(RvModel22(2, test2, 0L, false))
+        videos.add(RvModel22(3, test3, 0L, false))
 
         mainAdapter = RvMainAdapter22(object : RvMainAdapter22.Callback {
-            override fun callback(selectedItem: RvModel, position: Int) {
+            override fun callback(selectedItem: RvModel22, position: Int) {
 
                 Log.e("3", "33 / ${mainAdapter.viewHolders.size}")
                 Log.e("3", "34 / ${videos.size}")

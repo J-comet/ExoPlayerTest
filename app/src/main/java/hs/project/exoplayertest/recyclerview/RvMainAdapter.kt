@@ -18,7 +18,9 @@ import hs.project.exoplayertest.databinding.ItemRvMainBinding
 class RvMainAdapter(private val callback: Callback) :
     RecyclerView.Adapter<RvMainAdapter.ViewHolder>() {
     var datas = ArrayList<RvModel>()
-    var viewHolders = ArrayList<RvMainAdapter.ViewHolder>()
+    var dataInfos = ArrayList<RvModelInnerInfo>()
+
+    //    var viewHolders = ArrayList<RvMainAdapter.ViewHolder>()
     var exoPlayer: ExoPlayer? = null
 
     interface Callback {
@@ -38,7 +40,7 @@ class RvMainAdapter(private val callback: Callback) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 //        holder.bind(datas[position])
-        viewHolders.add(holder)
+//        dataInfos.add(holder)
     }
 
     override fun onViewDetachedFromWindow(holder: ViewHolder) {
@@ -58,26 +60,36 @@ class RvMainAdapter(private val callback: Callback) :
 
             Log.e("item", "item / $item")
 
-            if (item.playWhenReady) {
+            if (item.innerInfo.isPlay) {
                 itemBinding.ivPlayPause.setImageResource(R.drawable.icn_live_video_pause)
             } else {
                 itemBinding.ivPlayPause.setImageResource(R.drawable.icn_live_video_play)
+                itemBinding.ivPlayPause.isVisible = true
             }
 
             itemBinding.ivPlayPause.setOnClickListener {
-                callback.callback(datas[bindingAdapterPosition].copy(playbackPosition = itemBinding.playerView.player?.currentPosition ?: 0L, playWhenReady = itemBinding.playerView.player?.playWhenReady ?: false))
+                callback.callback(
+                    datas[bindingAdapterPosition].copy(
+                        innerInfo = datas[bindingAdapterPosition].innerInfo.copy(
+                            seekTime = itemBinding.playerView.player?.currentPosition ?: 0L,
+                            isPlay = itemBinding.playerView.player?.playWhenReady ?: false
+                        )
+                    )
+                )
             }
 
             itemBinding.playerView.setOnClickListener {
-                showBtnPlayPause()
+                if (item.innerInfo.isPlay) {
+                    showBtnPlayPause()
+                }
             }
 
 
             exoPlayer = ExoPlayer.Builder(itemBinding.root.context).build().also {
                 val mediaItem = MediaItem.fromUri(item.videoPath)
                 it.setMediaItem(mediaItem)
-                it.playWhenReady = item.playWhenReady
-                it.seekTo(item.playbackPosition)
+                it.playWhenReady = item.innerInfo.isPlay
+                it.seekTo(item.innerInfo.seekTime)
                 it.prepare()
 
                 it.addListener(object : Player.Listener {
@@ -99,17 +111,21 @@ class RvMainAdapter(private val callback: Callback) :
                                 itemBinding.progress.isVisible = false
                                 itemBinding.ivPlayPause.isVisible = true
                             }
+
                             Player.STATE_ENDED -> {
                                 // 재생 완료
                             }
-                            Player.STATE_BUFFERING ->{
+
+                            Player.STATE_BUFFERING -> {
                                 itemBinding.ivPlayPause.isVisible = false
                                 itemBinding.progress.isVisible = true
                             }
+
                             Player.STATE_IDLE -> {
                                 itemBinding.ivPlayPause.isVisible = false
                                 itemBinding.progress.isVisible = true
                             }
+
                             else -> Unit
                         }
                     }
