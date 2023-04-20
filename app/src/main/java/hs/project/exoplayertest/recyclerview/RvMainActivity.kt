@@ -60,9 +60,16 @@ class RvMainActivity : AppCompatActivity() {
                 videos.forEachIndexed { index, item ->
                     if (selectedItem.id == item.id) {
 
+                        val mediaMetadataRetriever = MediaMetadataRetriever()
+                        mediaMetadataRetriever.setDataSource(item.videoPath)
+
+                        Log.e("time", "time / ${item.innerInfo.seekTime}")
+                        val bitmap = mediaMetadataRetriever.getFrameAtTime(selectedItem.innerInfo.seekTime * 1000L)
+
                         videos[index] = selectedItem.copy(
                             innerInfo = selectedItem.innerInfo.copy(
-                                isPlay = !selectedItem.innerInfo.isPlay
+                                isPlay = !selectedItem.innerInfo.isPlay,
+                                thumbnail = bitmap
                             )
                         )
 

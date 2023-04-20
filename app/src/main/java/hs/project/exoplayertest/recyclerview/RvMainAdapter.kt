@@ -1,5 +1,6 @@
 package hs.project.exoplayertest.recyclerview
 
+import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.os.Handler
 import android.os.Looper
@@ -31,7 +32,7 @@ class RvMainAdapter(private val callback: Callback) :
         super.onViewAttachedToWindow(holder)
         Log.e("33", "Attached")
         holder.exoPlayerBind(datas[holder.bindingAdapterPosition])
-//        holder.bind(datas[holder.bindingAdapterPosition])
+        holder.bind(datas[holder.bindingAdapterPosition])
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -40,7 +41,7 @@ class RvMainAdapter(private val callback: Callback) :
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(datas[position])
+//        holder.bind(datas[position])
 //        holder.bind(datas[position])
 //        dataInfos.add(holder)
     }
@@ -64,8 +65,6 @@ class RvMainAdapter(private val callback: Callback) :
 
             Log.e("item", "item 111 / ${item.videoPath}")
 
-//            Glide.with(itemBinding.root).clear(itemBinding.ivThumbnail)
-
             if (item.innerInfo.thumbnail == null) {
                 Glide.with(itemBinding.root).load(item.innerInfo.defaultThumbnail).centerCrop().into(itemBinding.ivThumbnail)
             } else {
@@ -82,16 +81,13 @@ class RvMainAdapter(private val callback: Callback) :
 
             itemBinding.ivPlayPause.setOnClickListener {
 
-//                val mediaMetadataRetriever = MediaMetadataRetriever()
-//                mediaMetadataRetriever.setDataSource(item.videoPath)
-//                val bitmap = mediaMetadataRetriever.getFrameAtTime(item.innerInfo.seekTime * 1000)
+                Log.e("111", "aaa ${itemBinding.playerView.player?.currentPosition}")
 
                 callback.callback(
                     item.copy(
                         innerInfo = item.innerInfo.copy(
                             seekTime = itemBinding.playerView.player?.currentPosition ?: 0L,
-                            isPlay = itemBinding.playerView.player?.playWhenReady ?: false,
-                            thumbnail = null
+                            isPlay = itemBinding.playerView.player?.playWhenReady ?: false
                         )
                     )
                 )
@@ -150,8 +146,8 @@ class RvMainAdapter(private val callback: Callback) :
                             }
 
                             Player.STATE_IDLE -> {
-                                itemBinding.ivPlayPause.visibility = View.INVISIBLE
-                                itemBinding.progress.visibility = View.VISIBLE
+//                                itemBinding.ivPlayPause.visibility = View.INVISIBLE
+//                                itemBinding.progress.visibility = View.VISIBLE
                             }
                             else -> Unit
                         }
@@ -162,7 +158,10 @@ class RvMainAdapter(private val callback: Callback) :
                         if (isPlaying) {
                             itemBinding.ivPlayPause.visibility = View.VISIBLE
                             itemBinding.ivThumbnail.visibility = View.INVISIBLE
-                            hideBtnPlayPause()
+//                            hideBtnPlayPause()
+                        } else {
+                            itemBinding.ivPlayPause.visibility = View.VISIBLE
+                            itemBinding.ivThumbnail.visibility = View.VISIBLE
                         }
                     }
 
@@ -182,7 +181,7 @@ class RvMainAdapter(private val callback: Callback) :
         }
 
         private fun showBtnPlayPause() {
-            itemBinding.ivThumbnail.visibility = View.VISIBLE
+            itemBinding.ivPlayPause.visibility = View.VISIBLE
             Handler(Looper.getMainLooper()).postDelayed({
                 itemBinding.ivPlayPause.visibility = View.INVISIBLE
             }, 3000)
