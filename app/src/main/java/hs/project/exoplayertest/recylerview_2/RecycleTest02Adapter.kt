@@ -1,5 +1,7 @@
 package hs.project.exoplayertest.recylerview_2
 
+import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -7,14 +9,17 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextClock
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import hs.project.exoplayertest.R
 import hs.project.exoplayertest.databinding.ItemVideoTest02Binding
+import java.lang.Exception
 
 class RecycleTest02Adapter(
     private val playChange: (isPlay: Boolean, item: TestVideo02) -> Unit,
@@ -69,14 +74,39 @@ class RecycleTest02Adapter(
 //        }
 
         fun bind(item: TestVideo02) {
-            btnExoPlay = itemBinding.playerView.findViewById(com.google.android.exoplayer2.ui.R.id.exo_play)
-            btnExoPause = itemBinding.playerView.findViewById(com.google.android.exoplayer2.ui.R.id.exo_pause)
+            btnExoPlay =
+                itemBinding.playerView.findViewById(com.google.android.exoplayer2.ui.R.id.exo_play)
+            btnExoPause =
+                itemBinding.playerView.findViewById(com.google.android.exoplayer2.ui.R.id.exo_pause)
             btnExoFullScreen = itemBinding.playerView.findViewById(R.id.exo_fullscreen_icon)
             exoPlayerDim = itemBinding.playerView.findViewById(R.id.bg_exo_dim)
 
             btnExoFullScreen.setOnClickListener {
                 updateSeekTime(item)
                 fullScreen(item)
+            }
+
+            Glide.with(itemBinding.root).clear(itemBinding.ivThumbnail)
+
+            if (item.videoThumbnail == null) {
+                Log.e("1", "videoThumbnail = null")
+                Glide.with(itemBinding.root)
+                    .load(item.defaultThumbnail)
+                    .centerCrop()
+                    .into(itemBinding.ivThumbnail)
+            } else {
+                Log.e("1", "videoThumbnail = GOOD")
+                Glide.with(itemBinding.root)
+                    .load(item.videoThumbnail)
+                    .centerCrop()
+                    .error(item.defaultThumbnail)
+                    .into(itemBinding.ivThumbnail)
+            }
+
+            if (item.playWhenReady) {
+                videoPlayStatus()
+            } else {
+                videoStopStatus()
             }
 
             exoPlayer = ExoPlayer.Builder(itemBinding.root.context).build()
@@ -95,6 +125,12 @@ class RecycleTest02Adapter(
                                     // playWhenReady == false 이면 미디어 일시중지
                                     // 즉시 재생 불가능, 준비만 된 상태
                                     Log.e("STATE_READY", "준비")
+
+//                                    if (item.playWhenReady) {
+//                                        videoPlayStatus()
+//                                    } else {
+//                                        videoStopStatus()
+//                                    }
 
 //                                    if (item.playWhenReady) {
 //                                        exoPlayer?.play()
@@ -120,8 +156,16 @@ class RecycleTest02Adapter(
 
                         override fun onIsPlayingChanged(isPlaying: Boolean) {
                             super.onIsPlayingChanged(isPlaying)
+
+                            if (isPlaying) {
+                                videoPlayStatus()
+                            } else {
+                                videoStopStatus()
+                            }
+
                             getCurrentPlayerPosition()
                             updateSeekTime(item)
+//                            updateVideoThumbnail(currentList[bindingAdapterPosition])
                             playChange(isPlaying, item)
                         }
                     })
@@ -142,7 +186,10 @@ class RecycleTest02Adapter(
         // 폴딩 방식으로
         private fun getCurrentPlayerPosition() {
             if (exoPlayer?.isPlaying == true) {
-                Log.d("TAG", "current id : ${currentList[bindingAdapterPosition].id} / pos: ${exoPlayer?.currentPosition}")
+                Log.d(
+                    "TAG",
+                    "current id : ${currentList[bindingAdapterPosition].id} / pos: ${exoPlayer?.currentPosition}"
+                )
                 updateSeekTime(currentList[bindingAdapterPosition])
                 itemBinding.playerView.postDelayed({ getCurrentPlayerPosition() }, 1000)
             }
@@ -150,6 +197,30 @@ class RecycleTest02Adapter(
 
         private fun updateSeekTime(item: TestVideo02) {
             item.seekTime = exoPlayer?.currentPosition ?: 0L
+        }
+
+        private fun updateVideoThumbnail(item: TestVideo02) {
+            val mediaMetadataRetriever = MediaMetadataRetriever()
+            mediaMetadataRetriever.setDataSource(item.path)
+
+            val bitmap = try {
+                Log.e("bitmap", "VideoThumbnail / ${item.seekTime}")
+                mediaMetadataRetriever.getFrameAtTime(item.seekTime * 1000L)
+            } catch (e: Exception) {
+                Log.e("bitmap", "error bitmap = / ".plus(e.stackTraceToString()))
+                null
+            }
+            item.videoThumbnail = bitmap
+        }
+
+        private fun videoStopStatus() {
+            itemBinding.ivThumbnail.isVisible = true
+            itemBinding.ivPlay.isVisible = true
+        }
+
+        private fun videoPlayStatus() {
+            itemBinding.ivThumbnail.isVisible = false
+            itemBinding.ivPlay.isVisible = false
         }
     }
 }
