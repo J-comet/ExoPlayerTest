@@ -18,6 +18,7 @@
         android:id="@+id/player_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        app:surface_type="texture_view"
         app:controller_layout_id="@layout/custom_list_player_control_view"
         app:layout_constraintBottom_toBottomOf="@+id/video_main_size"
         app:layout_constraintEnd_toEndOf="@id/video_main_size"
@@ -27,7 +28,7 @@
         app:show_timeout="3000"
         android:background="@android:color/transparent"
         app:shutter_background_color="@android:color/transparent"
-        app:use_controller="true" />
+        app:use_controller="false" />
 
     <ImageView
         android:id="@+id/iv_thumbnail"
@@ -40,12 +41,23 @@
 
     <ImageView
         android:id="@+id/iv_play"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:src="@drawable/icn_live_video_play"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintBottom_toBottomOf="@+id/video_main_size"
+        app:layout_constraintEnd_toEndOf="@id/video_main_size"
+        app:layout_constraintStart_toStartOf="@id/video_main_size"
+        app:layout_constraintTop_toTopOf="@id/video_main_size" />
+
+    <ImageView
+        android:id="@+id/iv_pause"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/icn_live_video_pause"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/video_main_size"
+        app:layout_constraintEnd_toEndOf="@id/video_main_size"
+        app:layout_constraintStart_toStartOf="@id/video_main_size"
+        app:layout_constraintTop_toTopOf="@id/video_main_size" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

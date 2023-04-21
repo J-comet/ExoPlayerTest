@@ -37,6 +37,16 @@ class RecycleTest02Adapter(
     }
 ) {
 
+    override fun onViewAttachedToWindow(holder: ViewHolder) {
+        super.onViewAttachedToWindow(holder)
+        holder.bind(currentList[holder.bindingAdapterPosition])
+    }
+
+    override fun onViewDetachedFromWindow(holder: ViewHolder) {
+        super.onViewDetachedFromWindow(holder)
+        holder.releasePlayer()
+    }
+
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
@@ -47,7 +57,7 @@ class RecycleTest02Adapter(
     }
 
     override fun onBindViewHolder(holder: RecycleTest02Adapter.ViewHolder, position: Int) {
-        holder.bind(currentList[position])
+//        holder.bind(currentList[position])
     }
 
     override fun onViewRecycled(holder: ViewHolder) {
@@ -69,11 +79,19 @@ class RecycleTest02Adapter(
         var seekTime = 0L
         var isPlay = false
 
-//        init {
-//            itemBinding.ivPlay.setOnClickListener {
-//                playChange(true, currentList[bindingAdapterPosition])
-//            }
-//        }
+        init {
+            itemBinding.ivPlay.setOnClickListener {
+                // 재생 눌렀을 때
+                videoPlayStatus()
+                playChange(true, currentList[bindingAdapterPosition])
+            }
+
+            itemBinding.ivPause.setOnClickListener {
+                // 일시정지 눌렀을 때
+                videoStopStatus()
+                playChange(false, currentList[bindingAdapterPosition])
+            }
+        }
 
         fun bind(item: TestVideo02) {
             btnExoPlay =
@@ -179,8 +197,7 @@ class RecycleTest02Adapter(
 
                             getCurrentPlayerPosition()
                             updateSeekTime(item)
-//                            updateVideoThumbnail(currentList[bindingAdapterPosition])
-                            playChange.invoke(isPlaying, item)
+//                            playChange.invoke(isPlaying, item)
                         }
                     })
                     it.prepare()
@@ -231,11 +248,13 @@ class RecycleTest02Adapter(
         private fun videoStopStatus() {
             itemBinding.ivThumbnail.isVisible = true
             itemBinding.ivPlay.isVisible = true
+            itemBinding.ivPause.isVisible = false
         }
 
         private fun videoPlayStatus() {
             itemBinding.ivThumbnail.isVisible = false
             itemBinding.ivPlay.isVisible = false
+            itemBinding.ivPause.isVisible = true
         }
     }
 }
