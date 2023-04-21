@@ -2,6 +2,7 @@ package hs.project.exoplayertest.recylerview_2
 
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
+import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -51,10 +52,11 @@ class RecycleTest02Adapter(
 
     override fun onViewRecycled(holder: ViewHolder) {
         holder.releasePlayer()
+        Glide.with(holder.itemBinding.root.context).clear(holder.itemBinding.ivThumbnail)
         super.onViewRecycled(holder)
     }
 
-    inner class ViewHolder(private val itemBinding: ItemVideoTest02Binding) :
+    inner class ViewHolder(val itemBinding: ItemVideoTest02Binding) :
         RecyclerView.ViewHolder(itemBinding.root) {
 
         var exoPlayer: ExoPlayer? = null
@@ -86,22 +88,34 @@ class RecycleTest02Adapter(
                 fullScreen(item)
             }
 
-            Glide.with(itemBinding.root).clear(itemBinding.ivThumbnail)
-
-            if (item.videoThumbnail == null) {
-                Log.e("1", "videoThumbnail = null")
+            if (item.seekTime > 1000L) {
+                Glide.with(itemBinding.root)
+                    .load(updateVideoThumbnail(item))
+                    .centerCrop()
+                    .error(item.defaultThumbnail)
+                    .into(itemBinding.ivThumbnail)
+            } else {
                 Glide.with(itemBinding.root)
                     .load(item.defaultThumbnail)
                     .centerCrop()
                     .into(itemBinding.ivThumbnail)
-            } else {
-                Log.e("1", "videoThumbnail = GOOD")
-                Glide.with(itemBinding.root)
-                    .load(item.videoThumbnail)
-                    .centerCrop()
-                    .error(item.defaultThumbnail)
-                    .into(itemBinding.ivThumbnail)
             }
+
+
+//            if (item.videoThumbnail == null) {
+//                Log.e("1", "videoThumbnail = null")
+//                Glide.with(itemBinding.root)
+//                    .load(item.defaultThumbnail)
+//                    .centerCrop()
+//                    .into(itemBinding.ivThumbnail)
+//            } else {
+//                Log.e("1", "videoThumbnail = GOOD")
+//                Glide.with(itemBinding.root)
+//                    .load(item.videoThumbnail)
+//                    .centerCrop()
+//                    .error(item.defaultThumbnail)
+//                    .into(itemBinding.ivThumbnail)
+//            }
 
             if (item.playWhenReady) {
                 videoPlayStatus()
@@ -112,10 +126,16 @@ class RecycleTest02Adapter(
             exoPlayer = ExoPlayer.Builder(itemBinding.root.context).build()
                 .also {
                     itemBinding.playerView.player = it
-                    it.setMediaItem(MediaItem.fromUri(item.path))
+                    it.setMediaItem(MediaItem.fromUri(Uri.parse(item.path)))
                     it.playWhenReady = item.playWhenReady
                     it.seekTo(item.seekTime)
                     it.addListener(object : Player.Listener {
+                        override fun onRenderedFirstFrame() {
+                            super.onRenderedFirstFrame()
+                            if (item.playWhenReady) {
+                                videoPlayStatus()
+                            }
+                        }
 
                         override fun onPlaybackStateChanged(playbackState: Int) {
                             super.onPlaybackStateChanged(playbackState)
@@ -157,12 +177,6 @@ class RecycleTest02Adapter(
                         override fun onIsPlayingChanged(isPlaying: Boolean) {
                             super.onIsPlayingChanged(isPlaying)
 
-                            if (isPlaying) {
-                                videoPlayStatus()
-                            } else {
-                                videoStopStatus()
-                            }
-
                             getCurrentPlayerPosition()
                             updateSeekTime(item)
 //                            updateVideoThumbnail(currentList[bindingAdapterPosition])
@@ -199,7 +213,7 @@ class RecycleTest02Adapter(
             item.seekTime = exoPlayer?.currentPosition ?: 0L
         }
 
-        private fun updateVideoThumbnail(item: TestVideo02) {
+        private fun updateVideoThumbnail(item: TestVideo02): Bitmap? {
             val mediaMetadataRetriever = MediaMetadataRetriever()
             mediaMetadataRetriever.setDataSource(item.path)
 
@@ -210,7 +224,8 @@ class RecycleTest02Adapter(
                 Log.e("bitmap", "error bitmap = / ".plus(e.stackTraceToString()))
                 null
             }
-            item.videoThumbnail = bitmap
+//            item.videoThumbnail = bitmap
+            return bitmap
         }
 
         private fun videoStopStatus() {

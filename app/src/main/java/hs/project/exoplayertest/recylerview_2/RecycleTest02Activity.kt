@@ -129,7 +129,7 @@ class RecycleTest02Activity : AppCompatActivity() {
                         }
 
                     } else if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
-                        Log.e("11", "1111111111")
+
                     }
                 }
             })
