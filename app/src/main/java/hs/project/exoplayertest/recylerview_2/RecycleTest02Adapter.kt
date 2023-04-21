@@ -85,7 +85,7 @@ class RecycleTest02Adapter(
 
             btnExoFullScreen.setOnClickListener {
                 updateSeekTime(item)
-                fullScreen(item)
+                fullScreen.invoke(item)
             }
 
             if (item.seekTime > 1000L) {
@@ -180,7 +180,7 @@ class RecycleTest02Adapter(
                             getCurrentPlayerPosition()
                             updateSeekTime(item)
 //                            updateVideoThumbnail(currentList[bindingAdapterPosition])
-                            playChange(isPlaying, item)
+                            playChange.invoke(isPlaying, item)
                         }
                     })
                     it.prepare()

@@ -110,29 +110,29 @@ class RecycleTest02Activity : AppCompatActivity() {
             /**
              * 스크롤 Idle 상태일 때 recyclerview seekTime 업데이트 하는 코드
              */
-            addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                    super.onScrollStateChanged(recyclerView, newState)
-                    if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                        val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-                        val firstVisiblePosition = layoutManager.findFirstVisibleItemPosition()
-                        val lastVisiblePosition = layoutManager.findLastVisibleItemPosition()
-                        for (i in firstVisiblePosition..lastVisiblePosition) {
-
-                            val holder = recyclerView.findViewHolderForAdapterPosition(i) as? RecycleTest02Adapter.ViewHolder
-                            holder?.let {
-                                val item = videos[i]
-                                val currentPosition = it.exoPlayer?.currentPosition ?: 0L
-                                item.seekTime = currentPosition
-                                Log.e("11", "item.seekTime / ${item.seekTime}")
-                            }
-                        }
-
-                    } else if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
-
-                    }
-                }
-            })
+//            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+//                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+//                    super.onScrollStateChanged(recyclerView, newState)
+//                    if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+//                        val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+//                        val firstVisiblePosition = layoutManager.findFirstVisibleItemPosition()
+//                        val lastVisiblePosition = layoutManager.findLastVisibleItemPosition()
+//                        for (i in firstVisiblePosition..lastVisiblePosition) {
+//
+//                            val holder = recyclerView.findViewHolderForAdapterPosition(i) as? RecycleTest02Adapter.ViewHolder
+//                            holder?.let {
+//                                val item = videos[i]
+//                                val currentPosition = it.exoPlayer?.currentPosition ?: 0L
+//                                item.seekTime = currentPosition
+//                                Log.e("11", "item.seekTime / ${item.seekTime}")
+//                            }
+//                        }
+//
+//                    } else if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+//
+//                    }
+//                }
+//            })
         }
 
         test02Adapter.submitList(videos.toList())
