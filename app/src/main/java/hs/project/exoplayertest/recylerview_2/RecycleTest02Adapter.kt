@@ -120,8 +120,9 @@ class RecycleTest02Adapter(
 
                         override fun onIsPlayingChanged(isPlaying: Boolean) {
                             super.onIsPlayingChanged(isPlaying)
-                            playChange(isPlaying, item)
                             getCurrentPlayerPosition()
+                            updateSeekTime(item)
+                            playChange(isPlaying, item)
                         }
                     })
                     it.prepare()
@@ -140,8 +141,8 @@ class RecycleTest02Adapter(
 
         // 폴딩 방식으로
         private fun getCurrentPlayerPosition() {
-            Log.d("TAG", "current pos: " + exoPlayer?.currentPosition)
             if (exoPlayer?.isPlaying == true) {
+                Log.d("TAG", "current id : ${currentList[bindingAdapterPosition].id} / pos: ${exoPlayer?.currentPosition}")
                 updateSeekTime(currentList[bindingAdapterPosition])
                 itemBinding.playerView.postDelayed({ getCurrentPlayerPosition() }, 1000)
             }
