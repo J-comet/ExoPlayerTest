@@ -82,8 +82,6 @@ class RecycleTest02Activity : AppCompatActivity() {
                         val lastVisiblePosition = layoutManager.findLastVisibleItemPosition()
                         for (i in firstVisiblePosition..lastVisiblePosition) {
 
-                            Log.e("11", "1111111111")
-
                             val holder = recyclerView.findViewHolderForAdapterPosition(i) as? RecycleTest02Adapter.ViewHolder
                             holder?.let {
                                 val item = videos[i]
@@ -92,6 +90,9 @@ class RecycleTest02Activity : AppCompatActivity() {
                                 Log.e("11", "item.seekTime / ${item.seekTime}")
                             }
                         }
+
+                    } else if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                        Log.e("11", "1111111111")
                     }
                 }
             })

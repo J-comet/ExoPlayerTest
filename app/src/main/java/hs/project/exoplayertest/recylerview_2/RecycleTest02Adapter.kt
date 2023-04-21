@@ -1,6 +1,5 @@
 package hs.project.exoplayertest.recylerview_2
 
-import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -51,6 +50,12 @@ class RecycleTest02Adapter(
 
         var seekTime = 0L
         var isPlay = false
+
+//        init {
+//            itemBinding.ivPlay.setOnClickListener {
+//                playChange(true, currentList[bindingAdapterPosition])
+//            }
+//        }
 
         fun bind(item: TestVideo02) {
             exoPlayer = ExoPlayer.Builder(itemBinding.root.context).build()
