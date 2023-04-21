@@ -2,8 +2,10 @@ package hs.project.exoplayertest.recylerview_2
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import hs.project.exoplayertest.R
 import hs.project.exoplayertest.databinding.ActivityRecycleTest02Binding
 import hs.project.exoplayertest.recyclerview.RvModel
@@ -36,6 +38,9 @@ class RecycleTest02Activity : AppCompatActivity() {
         videos.add(TestVideo02(4, test1,false,0L))
         videos.add(TestVideo02(5, test2,false,0L))
         videos.add(TestVideo02(6, test3,false,0L))
+        videos.add(TestVideo02(7, test1,false,0L))
+        videos.add(TestVideo02(8, test2,false,0L))
+        videos.add(TestVideo02(9, test3,false,0L))
 
         /**
          *  TODO 선택되지 않은 item 값들의 seekTime 을 어떻게 가져올 것인가
@@ -64,6 +69,32 @@ class RecycleTest02Activity : AppCompatActivity() {
         binding.rvList.apply {
             adapter = test02Adapter
             layoutManager = LinearLayoutManager(context)
+
+            /**
+             * 스크롤 Idle 상태일 때 recyclerview seekTime 업데이트 하는 코드
+             */
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                        val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                        val firstVisiblePosition = layoutManager.findFirstVisibleItemPosition()
+                        val lastVisiblePosition = layoutManager.findLastVisibleItemPosition()
+                        for (i in firstVisiblePosition..lastVisiblePosition) {
+
+                            Log.e("11", "1111111111")
+
+                            val holder = recyclerView.findViewHolderForAdapterPosition(i) as? RecycleTest02Adapter.ViewHolder
+                            holder?.let {
+                                val item = videos[i]
+                                val currentPosition = it.exoPlayer?.currentPosition ?: 0L
+                                item.seekTime = currentPosition
+                                Log.e("11", "item.seekTime / ${item.seekTime}")
+                            }
+                        }
+                    }
+                }
+            })
         }
 
         test02Adapter.submitList(videos.toList())

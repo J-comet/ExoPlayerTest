@@ -40,7 +40,7 @@ class RecycleTest02Adapter(
     }
 
     override fun onViewRecycled(holder: ViewHolder) {
-        holder.exoPlayer?.release()
+        holder.releasePlayer()
         super.onViewRecycled(holder)
     }
 
@@ -48,6 +48,9 @@ class RecycleTest02Adapter(
         RecyclerView.ViewHolder(itemBinding.root) {
 
         var exoPlayer: ExoPlayer? = null
+
+        var seekTime = 0L
+        var isPlay = false
 
         fun bind(item: TestVideo02) {
             exoPlayer = ExoPlayer.Builder(itemBinding.root.context).build()
@@ -75,13 +78,14 @@ class RecycleTest02Adapter(
                                 }
 
                                 Player.STATE_ENDED -> {
-                                    // 재생 완료
+//                                    item.seekTime = exoPlayer?.currentPosition ?: 0L
                                 }
 
                                 Player.STATE_BUFFERING -> {
                                 }
 
                                 Player.STATE_IDLE -> {
+//                                    item.seekTime = exoPlayer?.currentPosition ?: 0L
                                 }
 
                                 else -> Unit
@@ -99,10 +103,20 @@ class RecycleTest02Adapter(
 
         }
 
+        fun releasePlayer() {
+            exoPlayer?.run {
+//                seekTime = this.currentPosition
+//                isPlay = this.playWhenReady
+                release()
+            }
+            exoPlayer = null
+        }
+
         // 폴딩 방식으로
         private fun getCurrentPlayerPosition() {
             Log.d("TAG", "current pos: " + exoPlayer?.currentPosition)
             if (exoPlayer?.isPlaying == true) {
+                currentList[bindingAdapterPosition].seekTime = exoPlayer?.currentPosition ?: 0L
                 itemBinding.playerView.postDelayed({ getCurrentPlayerPosition() }, 1000)
             }
         }

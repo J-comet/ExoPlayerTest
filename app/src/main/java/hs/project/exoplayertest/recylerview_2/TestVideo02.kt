@@ -4,5 +4,5 @@ data class TestVideo02(
     val id: Int,
     val path: String,
     val playWhenReady: Boolean,
-    val seekTime: Long
+    var seekTime: Long
 )
