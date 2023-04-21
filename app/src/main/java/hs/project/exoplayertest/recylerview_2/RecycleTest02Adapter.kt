@@ -39,6 +39,11 @@ class RecycleTest02Adapter(
         holder.bind(currentList[position])
     }
 
+    override fun onViewRecycled(holder: ViewHolder) {
+        holder.exoPlayer?.release()
+        super.onViewRecycled(holder)
+    }
+
     inner class ViewHolder(private val itemBinding: ItemVideoTest02Binding) :
         RecyclerView.ViewHolder(itemBinding.root) {
 
@@ -52,6 +57,7 @@ class RecycleTest02Adapter(
                     it.playWhenReady = item.playWhenReady
                     it.seekTo(item.seekTime)
                     it.addListener(object : Player.Listener {
+
                         override fun onPlaybackStateChanged(playbackState: Int) {
                             super.onPlaybackStateChanged(playbackState)
                             when (playbackState) {
@@ -60,6 +66,12 @@ class RecycleTest02Adapter(
                                     // playWhenReady == false 이면 미디어 일시중지
                                     // 즉시 재생 불가능, 준비만 된 상태
                                     Log.e("STATE_READY", "준비")
+
+//                                    if (item.playWhenReady) {
+//                                        exoPlayer?.play()
+//                                    } else {
+//                                        exoPlayer?.pause()
+//                                    }
                                 }
 
                                 Player.STATE_ENDED -> {
@@ -78,11 +90,21 @@ class RecycleTest02Adapter(
 
                         override fun onIsPlayingChanged(isPlaying: Boolean) {
                             super.onIsPlayingChanged(isPlaying)
+                            getCurrentPlayerPosition()
                             playChange(isPlaying, item)
                         }
                     })
                     it.prepare()
                 }
+
+        }
+
+        // 폴딩 방식으로
+        private fun getCurrentPlayerPosition() {
+            Log.d("TAG", "current pos: " + exoPlayer?.currentPosition)
+            if (exoPlayer?.isPlaying == true) {
+                itemBinding.playerView.postDelayed({ getCurrentPlayerPosition() }, 1000)
+            }
         }
     }
 }
