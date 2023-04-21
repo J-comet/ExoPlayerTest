@@ -46,6 +46,10 @@ class RecycleTest02Activity : AppCompatActivity() {
          *  TODO 선택되지 않은 item 값들의 seekTime 을 어떻게 가져올 것인가
          */
         test02Adapter = RecycleTest02Adapter(
+            fullScreen = { item ->
+                Toast.makeText(this, item.id.toString().plus(" ").plus(item.seekTime), Toast.LENGTH_SHORT).show()
+            },
+
             playChange = { isPlay, selectItem ->
 
                 videos.forEachIndexed { index, testVideo02 ->

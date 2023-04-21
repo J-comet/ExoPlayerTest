@@ -2,17 +2,23 @@ package hs.project.exoplayertest.recylerview_2
 
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.TextClock
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
+import hs.project.exoplayertest.R
 import hs.project.exoplayertest.databinding.ItemVideoTest02Binding
 
 class RecycleTest02Adapter(
-    private val playChange: (isPlay: Boolean, item: TestVideo02) -> Unit
+    private val playChange: (isPlay: Boolean, item: TestVideo02) -> Unit,
+    private val fullScreen: (item: TestVideo02) -> Unit
 ) : ListAdapter<TestVideo02, RecycleTest02Adapter.ViewHolder>(
     object : DiffUtil.ItemCallback<TestVideo02?>() {
         override fun areItemsTheSame(oldItem: TestVideo02, newItem: TestVideo02): Boolean {
@@ -48,6 +54,11 @@ class RecycleTest02Adapter(
 
         var exoPlayer: ExoPlayer? = null
 
+        private lateinit var btnExoFullScreen: ImageView
+        private lateinit var btnExoPlay: ImageButton
+        private lateinit var btnExoPause: ImageView
+        private lateinit var exoPlayerDim: View
+
         var seekTime = 0L
         var isPlay = false
 
@@ -58,6 +69,16 @@ class RecycleTest02Adapter(
 //        }
 
         fun bind(item: TestVideo02) {
+            btnExoPlay = itemBinding.playerView.findViewById(com.google.android.exoplayer2.ui.R.id.exo_play)
+            btnExoPause = itemBinding.playerView.findViewById(com.google.android.exoplayer2.ui.R.id.exo_pause)
+            btnExoFullScreen = itemBinding.playerView.findViewById(R.id.exo_fullscreen_icon)
+            exoPlayerDim = itemBinding.playerView.findViewById(R.id.bg_exo_dim)
+
+            btnExoFullScreen.setOnClickListener {
+                updateSeekTime(item)
+                fullScreen(item)
+            }
+
             exoPlayer = ExoPlayer.Builder(itemBinding.root.context).build()
                 .also {
                     itemBinding.playerView.player = it
@@ -99,8 +120,8 @@ class RecycleTest02Adapter(
 
                         override fun onIsPlayingChanged(isPlaying: Boolean) {
                             super.onIsPlayingChanged(isPlaying)
-                            getCurrentPlayerPosition()
                             playChange(isPlaying, item)
+                            getCurrentPlayerPosition()
                         }
                     })
                     it.prepare()
@@ -121,9 +142,13 @@ class RecycleTest02Adapter(
         private fun getCurrentPlayerPosition() {
             Log.d("TAG", "current pos: " + exoPlayer?.currentPosition)
             if (exoPlayer?.isPlaying == true) {
-                currentList[bindingAdapterPosition].seekTime = exoPlayer?.currentPosition ?: 0L
+                updateSeekTime(currentList[bindingAdapterPosition])
                 itemBinding.playerView.postDelayed({ getCurrentPlayerPosition() }, 1000)
             }
+        }
+
+        private fun updateSeekTime(item: TestVideo02) {
+            item.seekTime = exoPlayer?.currentPosition ?: 0L
         }
     }
 }
