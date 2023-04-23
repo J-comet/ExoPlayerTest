@@ -3,17 +3,20 @@ package hs.project.exoplayertest.recylerview_2
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.net.Uri
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.TextClock
+import androidx.core.view.doOnAttach
+import androidx.core.view.doOnDetach
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -26,7 +29,6 @@ import hs.project.exoplayertest.databinding.ItemVideoTest02Binding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.lang.Exception
 
 class RecycleTest02Adapter(
     private val lifecycleCoroutineScope: LifecycleCoroutineScope,
@@ -52,8 +54,8 @@ class RecycleTest02Adapter(
     }
 
     override fun onViewDetachedFromWindow(holder: ViewHolder) {
-        super.onViewDetachedFromWindow(holder)
         holder.releasePlayer()
+        super.onViewDetachedFromWindow(holder)
     }
 
     override fun onCreateViewHolder(
@@ -78,6 +80,8 @@ class RecycleTest02Adapter(
     inner class ViewHolder(val itemBinding: ItemVideoTest02Binding) :
         RecyclerView.ViewHolder(itemBinding.root) {
 
+        private var lifecycleOwner: LifecycleOwner? = null
+
         var exoPlayer: ExoPlayer? = null
 
         private lateinit var btnExoFullScreen: ImageView
@@ -85,8 +89,14 @@ class RecycleTest02Adapter(
         private lateinit var btnExoPause: ImageView
         private lateinit var exoPlayerDim: View
 
-        var seekTime = 0L
-        var isPlay = false
+        init {
+            itemView.doOnAttach {
+                lifecycleOwner = itemView.findViewTreeLifecycleOwner()
+            }
+            itemView.doOnDetach {
+                lifecycleOwner = null
+            }
+        }
 
         init {
             itemBinding.ivPlay.setOnClickListener {
@@ -120,6 +130,24 @@ class RecycleTest02Adapter(
              *
              * 현재 코드는 1초 이상 지난 모든 영상 썸네일 새로 따는 중
              */
+
+            lifecycleOwner?.lifecycle?.addObserver(object : LifecycleEventObserver {
+                override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+                    when(event) {
+                        Lifecycle.Event.ON_START -> {
+                            exoPlayer?.prepare()
+                            exoPlayer?.play()
+                            Log.e("tag", "11111111 / " + event.name)
+                        }
+                        Lifecycle.Event.ON_PAUSE -> {
+                            exoPlayer?.pause()
+                            Log.e("tag", "2222222 / " + event.name)
+                        }
+                        else -> Unit
+                    }
+                }
+            })
+
             if (item.seekTime > 1000L) {
                 Glide.with(itemBinding.root)
                     .load(updateVideoThumbnail(item))
@@ -159,7 +187,7 @@ class RecycleTest02Adapter(
                 .also {
                     itemBinding.playerView.player = it
                     it.setMediaItem(MediaItem.fromUri(Uri.parse(item.path)))
-                    it.playWhenReady = item.playWhenReady
+                    it.playWhenReady = true
                     it.seekTo(item.seekTime)
                     it.addListener(object : Player.Listener {
                         override fun onRenderedFirstFrame() {
@@ -184,11 +212,11 @@ class RecycleTest02Adapter(
 //                                        videoStopStatus()
 //                                    }
 
-//                                    if (item.playWhenReady) {
-//                                        exoPlayer?.play()
-//                                    } else {
-//                                        exoPlayer?.pause()
-//                                    }
+                                    if (item.playWhenReady) {
+                                        exoPlayer?.play()
+                                    } else {
+                                        exoPlayer?.pause()
+                                    }
                                 }
 
                                 Player.STATE_ENDED -> {

@@ -73,9 +73,7 @@ class RecycleTest02Activity : AppCompatActivity() {
         videos.add(TestVideo02(8, test2,false,0L, testImg2, null))
         videos.add(TestVideo02(9, test3,false,0L, testImg3, null))
 
-        /**
-         *  TODO 선택되지 않은 item 값들의 seekTime 을 어떻게 가져올 것인가
-         */
+
         test02Adapter = RecycleTest02Adapter(
             lifecycleCoroutineScope = this.lifecycleScope,
             fullScreen = { item ->
@@ -88,10 +86,8 @@ class RecycleTest02Activity : AppCompatActivity() {
 
                     if (testVideo02.id == selectItem.id) {
                         videos[index] = selectItem.copy(playWhenReady = isPlay)
-//                        videos[index] = selectItem.copy(playWhenReady = isPlay, videoThumbnail = updateVideoThumbnail(selectItem))
                     } else {
                         videos[index] = testVideo02.copy(playWhenReady = false)
-//                        videos[index] = testVideo02.copy(playWhenReady = false, videoThumbnail = updateVideoThumbnail(testVideo02))
                     }
                 }
 
