@@ -1,10 +1,12 @@
 package hs.project.exoplayertest.util
 
 import android.content.Context
+import android.net.Uri
 import android.util.Log
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.ui.PlayerView
 
 class ExoPlayerManager {
 
@@ -17,22 +19,23 @@ class ExoPlayerManager {
         var instance: ExoPlayerManager = ExoPlayerManager()
     }
 
-    fun init(context: Context) {
-        if (exoPlayer == null) {
-            exoPlayer = ExoPlayer.Builder(context).build()
-        }
-    }
-
     fun prepare(
+        context: Context,
         videoPath: String,
         playWhenReady: Boolean,
         playbackPosition: Long,
-        playerListener: Player.Listener
+        playerListener: Player.Listener,
+        playerView: PlayerView
     ) {
 
+        if (exoPlayer == null) {
+            exoPlayer = ExoPlayer.Builder(context).build()
+        }
+
         exoPlayer?.also {
+            playerView.player = it
             this.playerListener = playerListener
-            it.setMediaItem(MediaItem.Builder().setUri(videoPath).build())
+            it.setMediaItem(MediaItem.fromUri(Uri.parse(videoPath)))
             it.playWhenReady = playWhenReady
             it.seekTo(playbackPosition)
             it.addListener(playerListener)

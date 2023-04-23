@@ -108,6 +108,31 @@ class RecycleTest02Activity : AppCompatActivity() {
         binding.rvList.apply {
             adapter = test02Adapter
             layoutManager = LinearLayoutManager(context)
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+
+                    val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                    when (newState) {
+                        RecyclerView.SCROLL_STATE_IDLE -> {
+                            val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+                            val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+                            for (i in firstVisibleItemPosition..lastVisibleItemPosition) {
+                                val holder = recyclerView.findViewHolderForAdapterPosition(i) as? RecycleTest02Adapter.ViewHolder
+                                holder?.exoPlayer?.playWhenReady = true
+                            }
+                        }
+                        else -> {
+                            val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+                            val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+                            for (i in firstVisibleItemPosition..lastVisibleItemPosition) {
+                                val holder = recyclerView.findViewHolderForAdapterPosition(i) as? RecycleTest02Adapter.ViewHolder
+                                holder?.exoPlayer?.playWhenReady = false
+                            }
+                        }
+                    }
+                }
+            })
 
             /**
              * 스크롤 Idle 상태일 때 recyclerview seekTime 업데이트 하는 코드
