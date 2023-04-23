@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import hs.project.exoplayertest.R
@@ -76,6 +77,7 @@ class RecycleTest02Activity : AppCompatActivity() {
          *  TODO 선택되지 않은 item 값들의 seekTime 을 어떻게 가져올 것인가
          */
         test02Adapter = RecycleTest02Adapter(
+            lifecycleCoroutineScope = this.lifecycleScope,
             fullScreen = { item ->
                 Toast.makeText(this, item.id.toString().plus(" ").plus(item.seekTime), Toast.LENGTH_SHORT).show()
             },

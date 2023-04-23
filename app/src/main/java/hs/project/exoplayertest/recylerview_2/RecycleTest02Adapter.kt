@@ -3,6 +3,8 @@ package hs.project.exoplayertest.recylerview_2
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +13,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextClock
 import androidx.core.view.isVisible
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -20,9 +23,13 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import hs.project.exoplayertest.R
 import hs.project.exoplayertest.databinding.ItemVideoTest02Binding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.lang.Exception
 
 class RecycleTest02Adapter(
+    private val lifecycleCoroutineScope: LifecycleCoroutineScope,
     private val playChange: (isPlay: Boolean, item: TestVideo02) -> Unit,
     private val fullScreen: (item: TestVideo02) -> Unit
 ) : ListAdapter<TestVideo02, RecycleTest02Adapter.ViewHolder>(
@@ -39,7 +46,9 @@ class RecycleTest02Adapter(
 
     override fun onViewAttachedToWindow(holder: ViewHolder) {
         super.onViewAttachedToWindow(holder)
-        holder.bind(currentList[holder.bindingAdapterPosition])
+        lifecycleCoroutineScope.launch {
+            holder.bind(currentList[holder.bindingAdapterPosition])
+        }
     }
 
     override fun onViewDetachedFromWindow(holder: ViewHolder) {
@@ -93,7 +102,7 @@ class RecycleTest02Adapter(
             }
         }
 
-        fun bind(item: TestVideo02) {
+        suspend fun bind(item: TestVideo02) {
             btnExoPlay =
                 itemBinding.playerView.findViewById(com.google.android.exoplayer2.ui.R.id.exo_play)
             btnExoPause =
@@ -106,6 +115,11 @@ class RecycleTest02Adapter(
                 fullScreen.invoke(item)
             }
 
+            /**
+             * 이전에 재생된 비디오가 무엇인지 알고 그 아이템만 썸네일 업데이트 하도록 추가 작업 필요
+             *
+             * 현재 코드는 1초 이상 지난 모든 영상 썸네일 새로 따는 중
+             */
             if (item.seekTime > 1000L) {
                 Glide.with(itemBinding.root)
                     .load(updateVideoThumbnail(item))
@@ -230,19 +244,21 @@ class RecycleTest02Adapter(
             item.seekTime = exoPlayer?.currentPosition ?: 0L
         }
 
-        private fun updateVideoThumbnail(item: TestVideo02): Bitmap? {
-            val mediaMetadataRetriever = MediaMetadataRetriever()
-            mediaMetadataRetriever.setDataSource(item.path)
+        private suspend fun updateVideoThumbnail(item: TestVideo02): Bitmap? {
+            return withContext(Dispatchers.Default) {
+                val mediaMetadataRetriever = MediaMetadataRetriever()
+                mediaMetadataRetriever.setDataSource(item.path)
 
-            val bitmap = try {
-                Log.e("bitmap", "VideoThumbnail / ${item.seekTime}")
-                mediaMetadataRetriever.getFrameAtTime(item.seekTime * 1000L)
-            } catch (e: Exception) {
-                Log.e("bitmap", "error bitmap = / ".plus(e.stackTraceToString()))
-                null
+                val bitmap = try {
+                    Log.e("bitmap", "VideoThumbnail / ${item.seekTime}")
+                    mediaMetadataRetriever.getFrameAtTime(item.seekTime * 1000L)
+                } catch (e: Exception) {
+                    Log.e("bitmap", "error bitmap = / ".plus(e.stackTraceToString()))
+                    null
+                }
+                item.videoThumbnail = bitmap
+                bitmap
             }
-//            item.videoThumbnail = bitmap
-            return bitmap
         }
 
         private fun videoStopStatus() {
