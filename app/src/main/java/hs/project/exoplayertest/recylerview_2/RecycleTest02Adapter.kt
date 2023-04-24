@@ -49,9 +49,10 @@ class RecycleTest02Adapter(
     override fun onViewAttachedToWindow(holder: ViewHolder) {
         super.onViewAttachedToWindow(holder)
         Log.e("onViewAttachedToWindow", "AttachedToWindow")
-        lifecycleCoroutineScope.launch {
-            holder.bind(currentList[holder.bindingAdapterPosition])
-        }
+        holder.bind(currentList[holder.bindingAdapterPosition])
+//        lifecycleCoroutineScope.launch {
+//            holder.bind(currentList[holder.bindingAdapterPosition])
+//        }
     }
 
     override fun onViewDetachedFromWindow(holder: ViewHolder) {
@@ -112,7 +113,7 @@ class RecycleTest02Adapter(
             }
         }
 
-        suspend fun bind(item: TestVideo02) {
+        fun bind(item: TestVideo02) {
 
             itemBinding.playerView.player = null
 
@@ -133,13 +134,13 @@ class RecycleTest02Adapter(
                 .centerCrop()
                 .into(itemBinding.ivThumbnail)
 
-            if (item.seekTime > 1000L) {
-                Glide.with(itemBinding.root)
-                    .load(updateVideoThumbnail(item))
-                    .centerCrop()
-                    .error(item.defaultThumbnail)
-                    .into(itemBinding.ivThumbnail)
-            }
+//            if (item.seekTime > 1000L) {
+//                Glide.with(itemBinding.root)
+//                    .load(updateVideoThumbnail(item))
+//                    .centerCrop()
+//                    .error(item.defaultThumbnail)
+//                    .into(itemBinding.ivThumbnail)
+//            }
 
             /**
              * 이전에 재생된 비디오가 무엇인지 알고 그 아이템만 썸네일 업데이트 하도록 추가 작업 필요
@@ -223,6 +224,10 @@ class RecycleTest02Adapter(
         }
 
         private fun initExoPlayer(item: TestVideo02) {
+            if (item.playWhenReady) {
+                itemBinding.progress.isVisible = true
+            }
+
             exoPlayer = ExoPlayer.Builder(itemBinding.root.context).build()
                 .also {
                     itemBinding.playerView.player = it

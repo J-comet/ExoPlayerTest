@@ -40,6 +40,8 @@ class RecycleTest02Activity : AppCompatActivity() {
     private val testImg6 =
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTT1tVXGbSUlPA_7fukWf-9yS8evxU07RctMZ7nibUwCw&s"
 
+    private var previousPlayingId = 0
+
     private val videos = arrayListOf<TestVideo02>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,6 +64,21 @@ class RecycleTest02Activity : AppCompatActivity() {
         return bitmap
     }
 
+//    private suspend fun updateVideoThumbnail(item: TestVideo02): Bitmap? {
+//        return withContext(Dispatchers.Default) {
+//            val mediaMetadataRetriever = MediaMetadataRetriever()
+//            mediaMetadataRetriever.setDataSource(item.path)
+//
+//            val bitmap = try {
+//                mediaMetadataRetriever.getFrameAtTime(item.seekTime * 1000L)
+//            } catch (e: Exception) {
+//                null
+//            }
+////            item.videoThumbnail = bitmap
+//            bitmap
+//        }
+//    }
+
     private fun initRecyclerView() {
         videos.add(TestVideo02(1, test1,false,0L, testImg1, null))
         videos.add(TestVideo02(2, test2,false,0L, testImg2, null))
@@ -82,22 +99,42 @@ class RecycleTest02Activity : AppCompatActivity() {
 
             playChange = { isPlay, selectItem ->
 
-                videos.forEachIndexed { index, testVideo02 ->
+                if (previousPlayingId == 0) {
 
-                    if (testVideo02.id == selectItem.id) {
-                        videos[index] = selectItem.copy(playWhenReady = isPlay)
-                    } else {
-                        videos[index] = testVideo02.copy(playWhenReady = false)
-                    }
+                } else {
+                    // 썸네일 따기
+
                 }
+
+//                lifecycleScope.launch {
+                    videos.forEachIndexed { index, testVideo02 ->
+                        if (testVideo02.id == selectItem.id) {
+//                            val time = measureTimeMillis {
+//                                updateVideoThumbnail(selectItem)
+//                            }
+//                            Log.e("ㅈㅂㄷ", "걸린시간 측정 ".plus(time))
+                            videos[index] = selectItem.copy(playWhenReady = isPlay, videoThumbnail = updateVideoThumbnail(selectItem))
+                        } else {
+                            if (previousPlayingId == testVideo02.id) {
+                                Log.e("previousPlayingId", "previousPlayingId ".plus(previousPlayingId))
+                                videos[index] = testVideo02.copy(playWhenReady = false, videoThumbnail = updateVideoThumbnail(testVideo02))
+                            } else {
+                                videos[index] = testVideo02.copy(playWhenReady = false)
+                            }
+                        }
+                    }
+
+                    test02Adapter.submitList(videos.toList())
+//                }
+
 
                 if (isPlay) {
-                    Toast.makeText(this, selectItem.id.toString().plus("/ 플레이"), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, selectItem.id.toString().plus("/ 플레이 ".plus(previousPlayingId)), Toast.LENGTH_SHORT).show()
+                    previousPlayingId = selectItem.id
                 } else {
-                    Toast.makeText(this, selectItem.id.toString().plus("/ 일시정지"), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, selectItem.id.toString().plus("/ 일시정지 ".plus(previousPlayingId)), Toast.LENGTH_SHORT).show()
+                    previousPlayingId = 0
                 }
-
-                test02Adapter.submitList(videos.toList())
             }
         )
 
