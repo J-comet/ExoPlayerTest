@@ -122,8 +122,8 @@ class RecycleTest02Adapter(
 
 //            btnExoPlay =
 //                itemBinding.playerView.findViewById(com.google.android.exoplayer2.ui.R.id.exo_play)
-//            btnExoPause =
-//                itemBinding.playerView.findViewById(com.google.android.exoplayer2.ui.R.id.exo_pause)
+            btnExoPause =
+                itemBinding.playerView.findViewById(com.google.android.exoplayer2.ui.R.id.exo_pause)
 //            btnExoFullScreen = itemBinding.playerView.findViewById(R.id.exo_fullscreen_icon)
 //            exoPlayerDim = itemBinding.playerView.findViewById(R.id.bg_exo_dim)
 
@@ -239,6 +239,7 @@ class RecycleTest02Adapter(
                     it.setMediaItem(MediaItem.fromUri(Uri.parse(item.path)))
                     it.playWhenReady = item.playWhenReady
                     it.seekTo(item.seekTime)
+                    it.volume = 0f
                     it.addListener(object : Player.Listener {
                         override fun onRenderedFirstFrame() {
                             super.onRenderedFirstFrame()

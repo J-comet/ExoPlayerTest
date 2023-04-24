@@ -1,7 +1,5 @@
 package hs.project.exoplayertest.recyclerview
 
-import android.graphics.Bitmap
-import android.media.MediaMetadataRetriever
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -76,7 +74,7 @@ class RvMainAdapter(private val callback: Callback) :
             if (item.innerInfo.isPlay) {
                 itemBinding.ivPlayPause.setImageResource(R.drawable.icn_live_video_pause)
             } else {
-                itemBinding.ivPlayPause.setImageResource(R.drawable.icn_live_video_play)
+                itemBinding.ivPlayPause.setImageResource(R.drawable.icn_live_video_play_round)
             }
 
             itemBinding.ivPlayPause.setOnClickListener {

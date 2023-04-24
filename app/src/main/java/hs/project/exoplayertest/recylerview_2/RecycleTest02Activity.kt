@@ -56,12 +56,6 @@ class RecycleTest02Activity : AppCompatActivity() {
         initRecyclerView()
     }
 
-    override fun onStart() {
-        super.onStart()
-        showSystemUI()
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-    }
-
     private fun showSystemUI() {
 //        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
         WindowCompat.setDecorFitsSystemWindows(window, true)
@@ -100,7 +94,7 @@ class RecycleTest02Activity : AppCompatActivity() {
         val screenDialog = FullScreenDialog().newInstance(item)
         screenDialog.setFullScreenCallback(object : FullScreenDialog.FullScreenCallback {
             override fun onDismiss(fullItem: TestVideo02) {
-                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+                showSystemUI()
                 requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
                 run {

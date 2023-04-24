@@ -25,7 +25,7 @@
         android:id="@+id/iv_play_pause"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:src="@drawable/icn_live_video_play"
+        android:src="@drawable/icn_live_video_play_round"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
