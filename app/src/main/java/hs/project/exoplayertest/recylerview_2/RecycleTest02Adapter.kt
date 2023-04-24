@@ -48,6 +48,7 @@ class RecycleTest02Adapter(
 
     override fun onViewAttachedToWindow(holder: ViewHolder) {
         super.onViewAttachedToWindow(holder)
+        Log.e("onViewAttachedToWindow", "AttachedToWindow")
         lifecycleCoroutineScope.launch {
             holder.bind(currentList[holder.bindingAdapterPosition])
         }
@@ -56,6 +57,7 @@ class RecycleTest02Adapter(
     override fun onViewDetachedFromWindow(holder: ViewHolder) {
         holder.releasePlayer()
         super.onViewDetachedFromWindow(holder)
+        Log.e("onViewDetachedFromWindow", "DetachedFromWindow")
     }
 
     override fun onCreateViewHolder(
@@ -96,9 +98,7 @@ class RecycleTest02Adapter(
             itemView.doOnDetach {
                 lifecycleOwner = null
             }
-        }
 
-        init {
             itemBinding.ivPlay.setOnClickListener {
                 // 재생 눌렀을 때
                 videoPlayStatus()
@@ -113,6 +113,9 @@ class RecycleTest02Adapter(
         }
 
         suspend fun bind(item: TestVideo02) {
+
+            itemBinding.playerView.player = null
+
             btnExoPlay =
                 itemBinding.playerView.findViewById(com.google.android.exoplayer2.ui.R.id.exo_play)
             btnExoPause =
@@ -125,6 +128,19 @@ class RecycleTest02Adapter(
                 fullScreen.invoke(item)
             }
 
+            Glide.with(itemBinding.root)
+                .load(item.videoThumbnail ?: item.defaultThumbnail)
+                .centerCrop()
+                .into(itemBinding.ivThumbnail)
+
+            if (item.seekTime > 1000L) {
+                Glide.with(itemBinding.root)
+                    .load(updateVideoThumbnail(item))
+                    .centerCrop()
+                    .error(item.defaultThumbnail)
+                    .into(itemBinding.ivThumbnail)
+            }
+
             /**
              * 이전에 재생된 비디오가 무엇인지 알고 그 아이템만 썸네일 업데이트 하도록 추가 작업 필요
              *
@@ -135,9 +151,11 @@ class RecycleTest02Adapter(
                 override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
                     when(event) {
                         Lifecycle.Event.ON_START -> {
-                            exoPlayer?.prepare()
-                            exoPlayer?.play()
-                            Log.e("tag", "11111111 / " + event.name)
+                            if (item.playWhenReady) {
+                                exoPlayer?.prepare()
+                                exoPlayer?.play()
+                                Log.e("tag", "11111111 Play / " + event.name)
+                            }
                         }
                         Lifecycle.Event.ON_PAUSE -> {
                             exoPlayer?.pause()
@@ -148,123 +166,28 @@ class RecycleTest02Adapter(
                 }
             })
 
-            if (item.seekTime > 1000L) {
-                Glide.with(itemBinding.root)
-                    .load(updateVideoThumbnail(item))
-                    .centerCrop()
-                    .error(item.defaultThumbnail)
-                    .into(itemBinding.ivThumbnail)
-            } else {
-                Glide.with(itemBinding.root)
-                    .load(item.defaultThumbnail)
-                    .centerCrop()
-                    .into(itemBinding.ivThumbnail)
-            }
-
-
-//            if (item.videoThumbnail == null) {
-//                Log.e("1", "videoThumbnail = null")
-//                Glide.with(itemBinding.root)
-//                    .load(item.defaultThumbnail)
-//                    .centerCrop()
-//                    .into(itemBinding.ivThumbnail)
-//            } else {
-//                Log.e("1", "videoThumbnail = GOOD")
-//                Glide.with(itemBinding.root)
-//                    .load(item.videoThumbnail)
-//                    .centerCrop()
-//                    .error(item.defaultThumbnail)
-//                    .into(itemBinding.ivThumbnail)
-//            }
-
             if (item.playWhenReady) {
                 videoPlayStatus()
+                initExoPlayer(item)
             } else {
                 videoStopStatus()
             }
-
-            exoPlayer = ExoPlayer.Builder(itemBinding.root.context).build()
-                .also {
-                    itemBinding.playerView.player = it
-                    it.setMediaItem(MediaItem.fromUri(Uri.parse(item.path)))
-                    it.playWhenReady = true
-                    it.seekTo(item.seekTime)
-                    it.addListener(object : Player.Listener {
-                        override fun onRenderedFirstFrame() {
-                            super.onRenderedFirstFrame()
-                            if (item.playWhenReady) {
-                                videoPlayStatus()
-                            }
-                        }
-
-                        override fun onPlaybackStateChanged(playbackState: Int) {
-                            super.onPlaybackStateChanged(playbackState)
-                            when (playbackState) {
-                                Player.STATE_READY -> {
-                                    // playWhenReady == true 이면 미디어 재생이 시작
-                                    // playWhenReady == false 이면 미디어 일시중지
-                                    // 즉시 재생 불가능, 준비만 된 상태
-                                    Log.e("STATE_READY", "준비")
-
-//                                    if (item.playWhenReady) {
-//                                        videoPlayStatus()
-//                                    } else {
-//                                        videoStopStatus()
-//                                    }
-
-                                    if (item.playWhenReady) {
-                                        exoPlayer?.play()
-                                    } else {
-                                        exoPlayer?.pause()
-                                    }
-                                }
-
-                                Player.STATE_ENDED -> {
-//                                    item.seekTime = exoPlayer?.currentPosition ?: 0L
-                                }
-
-                                Player.STATE_BUFFERING -> {
-                                }
-
-                                Player.STATE_IDLE -> {
-//                                    item.seekTime = exoPlayer?.currentPosition ?: 0L
-                                }
-
-                                else -> Unit
-                            }
-                        }
-
-                        override fun onIsPlayingChanged(isPlaying: Boolean) {
-                            super.onIsPlayingChanged(isPlaying)
-
-                            getCurrentPlayerPosition()
-                            updateSeekTime(item)
-//                            playChange.invoke(isPlaying, item)
-                        }
-                    })
-                    it.prepare()
-                }
-
         }
 
         fun releasePlayer() {
-            exoPlayer?.run {
-//                seekTime = this.currentPosition
-//                isPlay = this.playWhenReady
-                release()
-            }
+            exoPlayer?.release()
             exoPlayer = null
         }
 
         // 폴딩 방식으로
-        private fun getCurrentPlayerPosition() {
+        private fun getCurrentPlayerPosition(item: TestVideo02) {
             if (exoPlayer?.isPlaying == true) {
                 Log.d(
                     "TAG",
-                    "current id : ${currentList[bindingAdapterPosition].id} / pos: ${exoPlayer?.currentPosition}"
+                    "current id : ${item.id} / pos: ${exoPlayer?.currentPosition}"
                 )
-                updateSeekTime(currentList[bindingAdapterPosition])
-                itemBinding.playerView.postDelayed({ getCurrentPlayerPosition() }, 1000)
+                updateSeekTime(item)
+                itemBinding.playerView.postDelayed({ getCurrentPlayerPosition(item) }, 1000)
             }
         }
 
@@ -278,10 +201,8 @@ class RecycleTest02Adapter(
                 mediaMetadataRetriever.setDataSource(item.path)
 
                 val bitmap = try {
-                    Log.e("bitmap", "VideoThumbnail / ${item.seekTime}")
                     mediaMetadataRetriever.getFrameAtTime(item.seekTime * 1000L)
                 } catch (e: Exception) {
-                    Log.e("bitmap", "error bitmap = / ".plus(e.stackTraceToString()))
                     null
                 }
                 item.videoThumbnail = bitmap
@@ -299,6 +220,62 @@ class RecycleTest02Adapter(
             itemBinding.ivThumbnail.isVisible = false
             itemBinding.ivPlay.isVisible = false
             itemBinding.ivPause.isVisible = true
+        }
+
+        private fun initExoPlayer(item: TestVideo02) {
+            exoPlayer = ExoPlayer.Builder(itemBinding.root.context).build()
+                .also {
+                    itemBinding.playerView.player = it
+                    it.setMediaItem(MediaItem.fromUri(Uri.parse(item.path)))
+                    it.playWhenReady = item.playWhenReady
+                    it.seekTo(item.seekTime)
+                    it.addListener(object : Player.Listener {
+                        override fun onRenderedFirstFrame() {
+                            super.onRenderedFirstFrame()
+//                            if (item.playWhenReady) {
+//                                videoPlayStatus()
+//                            }
+                        }
+
+                        override fun onPlaybackStateChanged(playbackState: Int) {
+                            super.onPlaybackStateChanged(playbackState)
+                            when (playbackState) {
+                                Player.STATE_READY -> {
+                                    Log.e("STATE_READY", "준비")
+                                    itemBinding.progress.isVisible = false
+                                    if (item.playWhenReady) {
+                                        itemBinding.ivPause.isVisible = true
+                                    } else {
+                                        itemBinding.ivPlay.isVisible = true
+                                    }
+                                }
+
+                                Player.STATE_ENDED -> {
+//                                    item.seekTime = exoPlayer?.currentPosition ?: 0L
+                                }
+
+                                Player.STATE_BUFFERING -> {
+                                    itemBinding.progress.isVisible = true
+                                    itemBinding.ivPause.isVisible = false
+                                    itemBinding.ivPlay.isVisible = false
+                                }
+
+                                Player.STATE_IDLE -> {
+//                                    item.seekTime = exoPlayer?.currentPosition ?: 0L
+                                }
+
+                                else -> Unit
+                            }
+                        }
+
+                        override fun onIsPlayingChanged(isPlaying: Boolean) {
+                            super.onIsPlayingChanged(isPlaying)
+                            getCurrentPlayerPosition(item)
+                            updateSeekTime(item)
+                        }
+                    })
+                    it.prepare()
+                }
         }
     }
 }
