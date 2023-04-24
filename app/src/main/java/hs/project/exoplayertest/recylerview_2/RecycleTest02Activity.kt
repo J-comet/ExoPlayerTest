@@ -16,6 +16,9 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import hs.project.exoplayertest.databinding.ActivityRecycleTest02Binding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class RecycleTest02Activity : AppCompatActivity() {
 
@@ -47,9 +50,6 @@ class RecycleTest02Activity : AppCompatActivity() {
 
     private val videos = arrayListOf<TestVideo02>()
 
-    private lateinit var fullscreenDialog: Dialog
-    private var isFullScreen = false
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -58,23 +58,43 @@ class RecycleTest02Activity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+        showSystemUI()
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
 
-    private fun updateVideoThumbnail(item: TestVideo02): Bitmap? {
-        val mediaMetadataRetriever = MediaMetadataRetriever()
-        mediaMetadataRetriever.setDataSource(item.path)
-
-        val bitmap = try {
-            Log.e("bitmap", "VideoThumbnail / ${item.seekTime}")
-            mediaMetadataRetriever.getFrameAtTime(item.seekTime * 1000L)
-        } catch (e: Exception) {
-            Log.e("bitmap", "error bitmap = / ".plus(e.stackTraceToString()))
-            null
-        }
-        return bitmap
+    private fun showSystemUI() {
+//        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+        WindowInsetsControllerCompat(window, binding.root).show(WindowInsetsCompat.Type.systemBars())
     }
+
+    private suspend fun updateVideoThumbnail(item: TestVideo02): Bitmap? {
+        return withContext(Dispatchers.Main) {
+            val mediaMetadataRetriever = MediaMetadataRetriever()
+            mediaMetadataRetriever.setDataSource(item.path)
+
+            val bitmap = try {
+                mediaMetadataRetriever.getFrameAtTime(item.seekTime * 1000L)
+            } catch (e: Exception) {
+                null
+            }
+            bitmap
+        }
+    }
+
+//    private fun updateVideoThumbnail(item: TestVideo02): Bitmap? {
+//        val mediaMetadataRetriever = MediaMetadataRetriever()
+//        mediaMetadataRetriever.setDataSource(item.path)
+//
+//        val bitmap = try {
+//            Log.e("bitmap", "VideoThumbnail / ${item.seekTime}")
+//            mediaMetadataRetriever.getFrameAtTime(item.seekTime * 1000L)
+//        } catch (e: Exception) {
+//            Log.e("bitmap", "error bitmap = / ".plus(e.stackTraceToString()))
+//            null
+//        }
+//        return bitmap
+//    }
 
     private fun showFullScreenDialog(item: TestVideo02) {
         val screenDialog = FullScreenDialog().newInstance(item)
@@ -83,11 +103,15 @@ class RecycleTest02Activity : AppCompatActivity() {
                 window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
                 requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
-                videos.forEachIndexed { index, testVideo02 ->
-                    if (testVideo02.id == fullItem.id) {
-                        videos[index] = fullItem.copy(seekTime = fullItem.seekTime)
+                run {
+                    videos.forEachIndexed { index, testVideo02 ->
+                        if (testVideo02.id == fullItem.id) {
+                            videos[index] = fullItem.copy(seekTime = fullItem.seekTime)
+                            return@run
+                        }
                     }
                 }
+
                 test02Adapter.submitList(videos.toList())
 
             }
@@ -120,7 +144,7 @@ class RecycleTest02Activity : AppCompatActivity() {
 
                 }
 
-//                lifecycleScope.launch {
+                lifecycleScope.launch {
                     videos.forEachIndexed { index, testVideo02 ->
                         if (testVideo02.id == selectItem.id) {
 //                            val time = measureTimeMillis {
@@ -139,7 +163,7 @@ class RecycleTest02Activity : AppCompatActivity() {
                     }
 
                     test02Adapter.submitList(videos.toList())
-//                }
+                }
 
 
                 if (isPlay) {

@@ -118,6 +118,7 @@ class RecycleTest02Adapter(
         fun bind(item: TestVideo02) {
 
             itemBinding.playerView.player = null
+            Glide.with(itemBinding.root).clear(itemBinding.ivThumbnail)
 
 //            btnExoPlay =
 //                itemBinding.playerView.findViewById(com.google.android.exoplayer2.ui.R.id.exo_play)
