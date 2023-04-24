@@ -13,7 +13,6 @@ import androidx.core.view.doOnAttach
 import androidx.core.view.doOnDetach
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.findViewTreeLifecycleOwner
@@ -27,7 +26,6 @@ import com.google.android.exoplayer2.Player
 import hs.project.exoplayertest.R
 import hs.project.exoplayertest.databinding.ItemVideoTest02Binding
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class RecycleTest02Adapter(
@@ -102,13 +100,18 @@ class RecycleTest02Adapter(
             itemBinding.ivPlay.setOnClickListener {
                 // 재생 눌렀을 때
                 videoPlayStatus()
-                playChange(true, currentList[bindingAdapterPosition])
+                playChange.invoke(true, currentList[bindingAdapterPosition])
             }
 
             itemBinding.ivPause.setOnClickListener {
                 // 일시정지 눌렀을 때
                 videoStopStatus()
-                playChange(false, currentList[bindingAdapterPosition])
+                playChange.invoke(false, currentList[bindingAdapterPosition])
+            }
+
+            itemBinding.ivFullscreen.setOnClickListener {
+                updateSeekTime(currentList[bindingAdapterPosition])
+                fullScreen.invoke(currentList[bindingAdapterPosition])
             }
         }
 
@@ -116,17 +119,17 @@ class RecycleTest02Adapter(
 
             itemBinding.playerView.player = null
 
-            btnExoPlay =
-                itemBinding.playerView.findViewById(com.google.android.exoplayer2.ui.R.id.exo_play)
-            btnExoPause =
-                itemBinding.playerView.findViewById(com.google.android.exoplayer2.ui.R.id.exo_pause)
-            btnExoFullScreen = itemBinding.playerView.findViewById(R.id.exo_fullscreen_icon)
-            exoPlayerDim = itemBinding.playerView.findViewById(R.id.bg_exo_dim)
+//            btnExoPlay =
+//                itemBinding.playerView.findViewById(com.google.android.exoplayer2.ui.R.id.exo_play)
+//            btnExoPause =
+//                itemBinding.playerView.findViewById(com.google.android.exoplayer2.ui.R.id.exo_pause)
+//            btnExoFullScreen = itemBinding.playerView.findViewById(R.id.exo_fullscreen_icon)
+//            exoPlayerDim = itemBinding.playerView.findViewById(R.id.bg_exo_dim)
 
-            btnExoFullScreen.setOnClickListener {
-                updateSeekTime(item)
-                fullScreen.invoke(item)
-            }
+//            btnExoFullScreen.setOnClickListener {
+//                updateSeekTime(item)
+//                fullScreen.invoke(item)
+//            }
 
             Glide.with(itemBinding.root)
                 .load(item.videoThumbnail ?: item.defaultThumbnail)
@@ -214,12 +217,14 @@ class RecycleTest02Adapter(
             itemBinding.ivThumbnail.isVisible = true
             itemBinding.ivPlay.isVisible = true
             itemBinding.ivPause.isVisible = false
+            itemBinding.ivFullscreen.isVisible = false
         }
 
         private fun videoPlayStatus() {
             itemBinding.ivThumbnail.isVisible = false
             itemBinding.ivPlay.isVisible = false
             itemBinding.ivPause.isVisible = true
+            itemBinding.ivFullscreen.isVisible = true
         }
 
         private fun initExoPlayer(item: TestVideo02) {
