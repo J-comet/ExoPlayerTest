@@ -31,7 +31,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class RecycleTest02Adapter(
-    private val lifecycleCoroutineScope: LifecycleCoroutineScope,
     private val playChange: (isPlay: Boolean, item: TestVideo02) -> Unit,
     private val fullScreen: (item: TestVideo02) -> Unit
 ) : ListAdapter<TestVideo02, RecycleTest02Adapter.ViewHolder>(

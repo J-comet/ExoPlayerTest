@@ -28,7 +28,7 @@
         app:show_timeout="3000"
         android:background="@color/color_img_loading"
         app:shutter_background_color="@color/color_img_loading"
-        app:use_controller="false" />
+        app:use_controller="true" />
 
     <ImageView
         android:id="@+id/iv_thumbnail"

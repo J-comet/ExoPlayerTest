@@ -1,18 +1,21 @@
 package hs.project.exoplayertest.recylerview_2
 
+import android.app.Dialog
+import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import hs.project.exoplayertest.R
 import hs.project.exoplayertest.databinding.ActivityRecycleTest02Binding
-import hs.project.exoplayertest.recyclerview.RvModel
-import java.lang.Exception
 
 class RecycleTest02Activity : AppCompatActivity() {
 
@@ -44,10 +47,19 @@ class RecycleTest02Activity : AppCompatActivity() {
 
     private val videos = arrayListOf<TestVideo02>()
 
+    private lateinit var fullscreenDialog: Dialog
+    private var isFullScreen = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         initRecyclerView()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
 
     private fun updateVideoThumbnail(item: TestVideo02): Bitmap? {
@@ -64,20 +76,24 @@ class RecycleTest02Activity : AppCompatActivity() {
         return bitmap
     }
 
-//    private suspend fun updateVideoThumbnail(item: TestVideo02): Bitmap? {
-//        return withContext(Dispatchers.Default) {
-//            val mediaMetadataRetriever = MediaMetadataRetriever()
-//            mediaMetadataRetriever.setDataSource(item.path)
-//
-//            val bitmap = try {
-//                mediaMetadataRetriever.getFrameAtTime(item.seekTime * 1000L)
-//            } catch (e: Exception) {
-//                null
-//            }
-////            item.videoThumbnail = bitmap
-//            bitmap
-//        }
-//    }
+    private fun showFullScreenDialog(item: TestVideo02) {
+        val screenDialog = FullScreenDialog().newInstance(item)
+        screenDialog.setFullScreenCallback(object : FullScreenDialog.FullScreenCallback {
+            override fun onDismiss(fullItem: TestVideo02) {
+                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
+                videos.forEachIndexed { index, testVideo02 ->
+                    if (testVideo02.id == fullItem.id) {
+                        videos[index] = fullItem.copy(seekTime = fullItem.seekTime)
+                    }
+                }
+                test02Adapter.submitList(videos.toList())
+
+            }
+        })
+        supportFragmentManager.beginTransaction().add(screenDialog, FullScreenDialog.TAG).commitAllowingStateLoss()
+    }
 
     private fun initRecyclerView() {
         videos.add(TestVideo02(1, test1,false,0L, testImg1, null))
@@ -90,11 +106,9 @@ class RecycleTest02Activity : AppCompatActivity() {
         videos.add(TestVideo02(8, test2,false,0L, testImg2, null))
         videos.add(TestVideo02(9, test3,false,0L, testImg3, null))
 
-
         test02Adapter = RecycleTest02Adapter(
-            lifecycleCoroutineScope = this.lifecycleScope,
             fullScreen = { item ->
-                Toast.makeText(this, item.id.toString().plus(" ").plus(item.seekTime), Toast.LENGTH_SHORT).show()
+                showFullScreenDialog(item)
             },
 
             playChange = { isPlay, selectItem ->
