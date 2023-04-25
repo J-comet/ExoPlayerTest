@@ -1,10 +1,13 @@
 package hs.project.exoplayertest.recylerview_2
 
+import android.content.Context
 import android.content.DialogInterface
 import android.content.pm.ActivityInfo
+import android.media.AudioManager
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -49,6 +52,8 @@ class FullScreenDialog : DialogFragment() {
 //    private lateinit var btnExoPause: ImageView
 //    private lateinit var exoPlayerDim: View
 
+    private var audioManager: AudioManager? = null
+
     fun newInstance(item: TestVideo02): FullScreenDialog {
         val fullScreenDialog = FullScreenDialog()
         val args = Bundle()
@@ -64,6 +69,8 @@ class FullScreenDialog : DialogFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+//        activity?.volumeControlStream = AudioManager.STREAM_MUSIC
+
         arguments?.let {
             videoItem = it.getParcelable(VIDEO_ITEM)
             seekTime = videoItem?.seekTime ?: 0L
@@ -83,31 +90,74 @@ class FullScreenDialog : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        audioManager = activity?.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
+
+        dialog?.setOnKeyListener { dialog, keyCode, event ->
+            when(keyCode) {
+                KeyEvent.KEYCODE_VOLUME_UP -> {
+                    audioManager?.adjustStreamVolume(
+                        AudioManager.STREAM_MUSIC,
+                        AudioManager.ADJUST_RAISE,
+                        AudioManager.FLAG_SHOW_UI
+                    )
+
+                    if ((audioManager?.getStreamVolume(AudioManager.STREAM_MUSIC) ?: 0) > 0) {
+                        btnVolume.setImageResource(R.drawable.icn_live_video_volume)
+                    }
+
+                    return@setOnKeyListener true
+                }
+                KeyEvent.KEYCODE_VOLUME_DOWN -> {
+                    audioManager?.adjustStreamVolume(
+                        AudioManager.STREAM_MUSIC,
+                        AudioManager.ADJUST_LOWER,
+                        AudioManager.FLAG_SHOW_UI
+                    )
+
+                    if ((audioManager?.getStreamVolume(AudioManager.STREAM_MUSIC) ?: 0) < 1) {
+                        btnVolume.setImageResource(R.drawable.icn_live_video_mute)
+                    }
+
+                    return@setOnKeyListener true
+                }
+                else -> return@setOnKeyListener false
+            }
+        }
+
         hideSystemUi()
-        videoItem?.let { initExoPlayer(it) }
+
         btnVolume = binding.playerView.findViewById(R.id.iv_play_volume)
         btnExoSmallScreen = binding.playerView.findViewById(R.id.iv_small)
 
         btnVolume.setOnClickListener {
             if (isVolumeMute) {
-                Toast.makeText(requireActivity(), "볼륨 사용", Toast.LENGTH_SHORT).show()
                 btnVolume.setImageResource(R.drawable.icn_live_video_volume)
-                binding.playerView.player?.volume = 0.7f
+                audioManager?.setStreamVolume(AudioManager.STREAM_MUSIC, 10, 0)
+                binding.playerView.player?.volume = 1f
                 binding.playerView.onResume()
-                Log.e("121", "${binding.playerView.player?.volume}")
                 isVolumeMute = false
             } else {
-                Toast.makeText(requireActivity(), "볼륨 미사용", Toast.LENGTH_SHORT).show()
                 btnVolume.setImageResource(R.drawable.icn_live_video_mute)
+                audioManager?.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0)
                 binding.playerView.player?.volume = 0f
                 binding.playerView.onResume()
-                Log.e("121", "${binding.playerView.player?.volume}")
                 isVolumeMute = true
             }
         }
         btnExoSmallScreen.setOnClickListener {
             dismissAllowingStateLoss()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        videoItem?.let { initExoPlayer(it) }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        binding.playerView.player?.release()
     }
 
     private fun initExoPlayer(item: TestVideo02) {
@@ -118,11 +168,8 @@ class FullScreenDialog : DialogFragment() {
                 it.setMediaItem(MediaItem.fromUri(Uri.parse(item.path)))
                 it.playWhenReady = item.playWhenReady
                 it.seekTo(item.seekTime)
+                it.volume = 0f
                 it.addListener(object : Player.Listener {
-
-                    override fun onVolumeChanged(volume: Float) {
-                        super.onVolumeChanged(volume)
-                    }
 
                     override fun onPlaybackStateChanged(playbackState: Int) {
                         super.onPlaybackStateChanged(playbackState)
