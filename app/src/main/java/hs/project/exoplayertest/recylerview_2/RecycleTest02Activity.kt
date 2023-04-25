@@ -93,21 +93,9 @@ class RecycleTest02Activity : AppCompatActivity() {
     private fun showFullScreenDialog(item: TestVideo02) {
         val screenDialog = FullScreenDialog().newInstance(item)
         screenDialog.setFullScreenCallback(object : FullScreenDialog.FullScreenCallback {
-            override fun onDismiss(fullItem: TestVideo02) {
+            override fun onDismiss() {
                 showSystemUI()
                 requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-
-                run {
-                    videos.forEachIndexed { index, testVideo02 ->
-                        if (testVideo02.id == fullItem.id) {
-                            videos[index] = fullItem.copy(seekTime = fullItem.seekTime)
-                            return@run
-                        }
-                    }
-                }
-
-                test02Adapter.submitList(videos.toList())
-
             }
         })
         supportFragmentManager.beginTransaction().add(screenDialog, FullScreenDialog.TAG).commitAllowingStateLoss()

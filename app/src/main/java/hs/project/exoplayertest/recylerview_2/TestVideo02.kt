@@ -8,7 +8,7 @@ import kotlinx.parcelize.Parcelize
 data class TestVideo02(
     val id: Int,
     val path: String,
-    val playWhenReady: Boolean,
+    var playWhenReady: Boolean,
     var seekTime: Long,
     val defaultThumbnail: String,
     var videoThumbnail: Bitmap?,

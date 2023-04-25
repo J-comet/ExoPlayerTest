@@ -233,11 +233,14 @@ class RecycleTest02Adapter(
                 itemBinding.progress.isVisible = true
             }
 
+            Log.e("item", "재생중인 Time = ${item.seekTime}")
+
             exoPlayer = ExoPlayer.Builder(itemBinding.root.context).build()
                 .also {
                     itemBinding.playerView.player = it
                     it.setMediaItem(MediaItem.fromUri(Uri.parse(item.path)))
                     it.playWhenReady = item.playWhenReady
+//                    it.seekTo(590000)
                     it.seekTo(item.seekTime)
                     it.volume = 0f
                     it.addListener(object : Player.Listener {
@@ -262,7 +265,17 @@ class RecycleTest02Adapter(
                                 }
 
                                 Player.STATE_ENDED -> {
-//                                    item.seekTime = exoPlayer?.currentPosition ?: 0L
+                                    it.seekTo(0)
+                                    it.playWhenReady = false
+
+                                    item.seekTime = 0
+                                    item.playWhenReady = false
+
+                                    Glide.with(itemBinding.root)
+                                        .load(item.defaultThumbnail)
+                                        .centerCrop()
+                                        .into(itemBinding.ivThumbnail)
+                                    videoStopStatus()
                                 }
 
                                 Player.STATE_BUFFERING -> {

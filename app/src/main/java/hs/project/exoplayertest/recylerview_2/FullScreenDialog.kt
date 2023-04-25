@@ -28,7 +28,7 @@ class FullScreenDialog : DialogFragment() {
     }
 
     interface FullScreenCallback {
-        fun onDismiss(item: TestVideo02)
+        fun onDismiss()
     }
 
     private var callback: FullScreenCallback? = null
@@ -132,7 +132,9 @@ class FullScreenDialog : DialogFragment() {
                             }
 
                             Player.STATE_ENDED -> {
-
+                                Log.e("STATE_ENDED", "영상 종료")
+                                it.seekTo(0)
+                                it.playWhenReady = false
                             }
 
                             Player.STATE_BUFFERING -> {
@@ -173,10 +175,11 @@ class FullScreenDialog : DialogFragment() {
 
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
-        videoItem?.let {
-            it.seekTime = binding.playerView.player?.currentPosition ?: seekTime
-            Log.e("time", "seekTime = ${it.seekTime}")
-            callback?.onDismiss(it)
-        }
+        callback?.onDismiss()
+//        videoItem?.let {
+//            it.seekTime = binding.playerView.player?.currentPosition ?: seekTime
+//            Log.e("time", "seekTime = ${it.seekTime}")
+//            callback?.onDismiss(it)
+//        }
     }
 }
