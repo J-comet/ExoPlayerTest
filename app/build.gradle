@@ -59,4 +59,7 @@ dependencies {
 
     // lifecycle scope
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
+
+    // youtube
+    implementation 'com.github.HaarigerHarald:android-youtubeExtractor:v1.7.0'
 }
